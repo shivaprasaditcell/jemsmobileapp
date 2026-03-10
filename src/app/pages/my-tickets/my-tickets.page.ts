@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { Location } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { filter, take } from 'rxjs/operators';
 import { AuthService } from '../../core/services/auth.service';
@@ -27,11 +26,8 @@ export class MyTicketsPage implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private http: HttpClient,
-    private location: Location
+    private http: HttpClient
   ) {}
-
-  goBack() { this.location.back(); }
 
   ngOnInit() {
     this.authService.user$.pipe(filter(u => !!u), take(1)).subscribe(u => {

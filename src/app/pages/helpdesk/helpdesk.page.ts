@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { Location } from '@angular/common';
 import { Router } from '@angular/router';
 
 @Component({
@@ -9,9 +8,7 @@ import { Router } from '@angular/router';
   standalone: false
 })
 export class HelpdeskPage {
-  constructor(private router: Router, private location: Location) {}
-
-  goBack() { this.location.back(); }
+  constructor(private router: Router) {}
 
   goTo(path: string) {
     this.router.navigateByUrl(path);
