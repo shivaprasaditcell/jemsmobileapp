@@ -86,6 +86,12 @@ export class DigitalContentPage implements OnInit {
 
   back() { this.router.navigateByUrl('/tabs/assigned-courses'); }
 
+  handleRefresh(event: any) {
+    this.expandedUnits.clear();
+    this.expandedChapters.clear();
+    this.loadSessionThenTree(event);
+  }
+
   safeHtml(html: string): SafeHtml {
     return this.sanitizer.bypassSecurityTrustHtml(html || '');
   }
@@ -95,7 +101,7 @@ export class DigitalContentPage implements OnInit {
     return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, '').trim().length > 0;
   }
 
-  private loadSessionThenTree() {
+  private loadSessionThenTree(event?: any) {
     this.loading = true;
     this.error   = false;
 
@@ -103,15 +109,15 @@ export class DigitalContentPage implements OnInit {
       .subscribe({
         next: sessions => {
           const current = sessions?.find((s: any) => s.iscurrentsession || s.isCurrent) ?? sessions?.[0];
-          if (!current) { this.error = true; this.loading = false; return; }
+          if (!current) { this.error = true; this.loading = false; event?.target?.complete(); return; }
           this.sessionName = current.sessionName || '';
-          this.loadTree(current.sessionslnum);
+          this.loadTree(current.sessionslnum, event);
         },
-        error: () => { this.error = true; this.loading = false; }
+        error: () => { this.error = true; this.loading = false; event?.target?.complete(); }
       });
   }
 
-  private loadTree(sessionId: number) {
+  private loadTree(sessionId: number, event?: any) {
     this.http.get<ContentTreeResponse>(
       `${environment.apiUrl}Content/tree/${this.facultyId}/${this.subjectId}/${sessionId}`
     ).subscribe({
@@ -120,8 +126,9 @@ export class DigitalContentPage implements OnInit {
         // auto-expand first unit
         if (this.units.length) this.expandedUnits.add(this.units[0].nodeId);
         this.loading = false;
+        event?.target?.complete();
       },
-      error: () => { this.error = true; this.loading = false; }
+      error: () => { this.error = true; this.loading = false; event?.target?.complete(); }
     });
   }
 }

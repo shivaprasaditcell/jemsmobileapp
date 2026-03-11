@@ -14,6 +14,10 @@
 
 <ion-content class="dc-content">
 
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
   <!-- Session badge -->
   <div class="session-badge" *ngIf="sessionName && !loading">
     <ion-icon name="calendar-outline"></ion-icon>
