@@ -98,6 +98,35 @@ $primary: #125875;
 }
 
 /* Empty state */
+
+.ac-content-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex-shrink: 0;
+  width: 58px;
+  height: 58px;
+  border-radius: 14px;
+  border: 1.5px solid rgba(18, 88, 117, 0.15);
+  background: rgba(18, 88, 117, 0.06);
+  color: #125875;
+  cursor: pointer;
+  transition: background 0.18s, transform 0.15s;
+
+  span {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  &:active {
+    background: rgba(18, 88, 117, 0.16);
+    transform: scale(0.94);
+  }
+}
 .empty-state {
   display: flex;
   flex-direction: column;

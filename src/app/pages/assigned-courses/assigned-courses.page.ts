@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { filter, take } from 'rxjs/operators';
 import { AuthService } from '../../core/services/auth.service';
@@ -17,7 +18,11 @@ export class AssignedCoursesPage implements OnInit {
 
   private facultyId = 0;
 
-  constructor(private authService: AuthService, private http: HttpClient) {}
+  constructor(
+    private authService: AuthService,
+    private http: HttpClient,
+    private router: Router
+  ) {}
 
   ngOnInit() {
     this.authService.user$.pipe(filter(u => !!u), take(1)).subscribe(u => {
@@ -37,6 +42,16 @@ export class AssignedCoursesPage implements OnInit {
   }
 
   handleRefresh(event: any) { this.load(event); }
+
+  openContent(course: FacultySubject) {
+    this.router.navigate(['/tabs/digital-content'], {
+      queryParams: {
+        subjectId:   course.subjectslnum,
+        subjectName: course.courseName,
+        subjectCode: course.courseCode
+      }
+    });
+  }
 
   activityColor(index: number): string {
     const colors = ['#125875', '#0ea5e9', '#F26622', '#7c3aed', '#10b981', '#f59e0b'];

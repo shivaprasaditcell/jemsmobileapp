@@ -68,6 +68,10 @@ const routes: Routes = [
         loadChildren: () => import('../pages/mentoring-sessions/mentoring-sessions.module').then(m => m.MentoringSessionsPageModule)
       },
       {
+        path: 'digital-content',
+        loadChildren: () => import('../pages/digital-content/digital-content.module').then(m => m.DigitalContentPageModule)
+      },
+      {
         path: '',
         redirectTo: 'home',
         pathMatch: 'full'

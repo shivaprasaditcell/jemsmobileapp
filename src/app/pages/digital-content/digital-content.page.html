@@ -1,0 +1,106 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/assigned-courses"></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      <div class="header-title">
+        <span class="header-subject">{{ subjectName }}</span>
+        <span class="header-code" *ngIf="subjectCode">{{ subjectCode }}</span>
+      </div>
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="dc-content">
+
+  <!-- Session badge -->
+  <div class="session-badge" *ngIf="sessionName && !loading">
+    <ion-icon name="calendar-outline"></ion-icon>
+    {{ sessionName }}
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="skel-wrap">
+    <div class="unit-skel" *ngFor="let u of [1,2,3]">
+      <ion-skeleton-text animated style="width:60%;height:14px;border-radius:6px"></ion-skeleton-text>
+      <div class="chapter-skel" *ngFor="let c of [1,2]">
+        <ion-skeleton-text animated style="width:75%;height:11px;border-radius:5px;margin:10px 0 0 20px"></ion-skeleton-text>
+        <ion-skeleton-text animated style="width:50%;height:10px;border-radius:4px;margin:7px 0 0 40px"></ion-skeleton-text>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div class="empty-state" *ngIf="!loading && error">
+    <ion-icon name="cloud-offline-outline"></ion-icon>
+    <p>Could not load content</p>
+    <ion-button fill="outline" size="small" (click)="back()">Go back</ion-button>
+  </div>
+
+  <!-- Empty -->
+  <div class="empty-state" *ngIf="!loading && !error && units.length === 0">
+    <ion-icon name="document-text-outline"></ion-icon>
+    <p>No content available for this subject</p>
+  </div>
+
+  <!-- ── Tree ─────────────────────────────────────── -->
+  <div class="tree-wrap" *ngIf="!loading && !error && units.length > 0">
+
+    <!-- UNIT -->
+    <div class="unit-block" *ngFor="let unit of units; let ui = index">
+      <button class="unit-header" (click)="toggleUnit(unit.nodeId)" type="button">
+        <div class="unit-badge">U{{ unit.displayOrder }}</div>
+        <span class="unit-title">{{ unit.nodeTitle }}</span>
+        <ion-icon
+          [name]="isUnitExpanded(unit.nodeId) ? 'chevron-up-outline' : 'chevron-down-outline'"
+          class="toggle-icon"></ion-icon>
+      </button>
+
+      <div class="unit-desc" *ngIf="hasContent(unit.nodeDescription) && isUnitExpanded(unit.nodeId)"
+        [innerHTML]="safeHtml(unit.nodeDescription)">
+      </div>
+
+      <!-- CHAPTERS -->
+      <div class="chapters-wrap" *ngIf="isUnitExpanded(unit.nodeId)">
+        <div class="chapter-block" *ngFor="let chapter of unit.children; let ci = index">
+          <button class="chapter-header" (click)="toggleChapter(chapter.nodeId)" type="button">
+            <div class="chapter-dot"></div>
+            <span class="chapter-title">{{ chapter.nodeTitle }}</span>
+            <span class="topic-count">{{ chapter.children?.length || 0 }} topic{{ (chapter.children?.length || 0) === 1 ? '' : 's' }}</span>
+            <ion-icon
+              [name]="isChapterExpanded(chapter.nodeId) ? 'chevron-up-outline' : 'chevron-down-outline'"
+              class="toggle-icon small"></ion-icon>
+          </button>
+
+          <div class="chapter-desc" *ngIf="hasContent(chapter.nodeDescription) && isChapterExpanded(chapter.nodeId)"
+            [innerHTML]="safeHtml(chapter.nodeDescription)">
+          </div>
+
+          <!-- TOPICS -->
+          <div class="topics-wrap" *ngIf="isChapterExpanded(chapter.nodeId)">
+            <div class="topic-row" *ngFor="let topic of chapter.children; let ti = index">
+              <div class="topic-index">{{ ti + 1 }}</div>
+              <div class="topic-body">
+                <span class="topic-title">{{ topic.nodeTitle }}</span>
+                <p class="topic-desc" *ngIf="hasContent(topic.nodeDescription)"
+                  [innerHTML]="safeHtml(topic.nodeDescription)">
+                </p>
+              </div>
+            </div>
+            <div class="topics-empty" *ngIf="!chapter.children?.length">
+              <ion-icon name="ellipse-outline"></ion-icon> No topics added yet
+            </div>
+          </div>
+
+        </div>
+
+        <div class="chapters-empty" *ngIf="!unit.children?.length">
+          No chapters added yet
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</ion-content>
