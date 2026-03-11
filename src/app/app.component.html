@@ -35,12 +35,6 @@
           <ion-label>Home</ion-label>
         </ion-item>
 
-        <ion-item button (click)="navigate('/tabs/timetable')" class="menu-item"
-          routerLink="/tabs/timetable" routerLinkActive="active-item">
-          <ion-icon name="calendar-outline" slot="start"></ion-icon>
-          <ion-label>Timetable</ion-label>
-        </ion-item>
-
         <ion-item button (click)="navigate('/tabs/events')" class="menu-item"
           routerLink="/tabs/events" routerLinkActive="active-item">
           <ion-icon name="megaphone-outline" slot="start"></ion-icon>
@@ -85,5 +79,76 @@
   </ion-menu>
 
   <ion-router-outlet id="main-content"></ion-router-outlet>
+
+  <div *ngIf="quickAccessOpen" class="quick-access-overlay" (click)="closeQuickAccess()">
+    <div class="quick-access-panel" (click)="$event.stopPropagation()">
+      <button class="quick-access-close" type="button" (click)="closeQuickAccess()" aria-label="Close quick access">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+
+      <div class="quick-access-search-wrap">
+        <ion-icon name="search-outline" class="quick-access-search-icon"></ion-icon>
+        <input
+          [(ngModel)]="quickAccessSearch"
+          class="quick-access-search"
+          type="text"
+          placeholder="Search modules..."
+          autocomplete="off" />
+      </div>
+
+      <div class="quick-access-grid">
+        <button
+          *ngFor="let card of filteredQuickAccessCards"
+          type="button"
+          class="quick-access-card"
+          [class.is-disabled]="!card.route"
+          (click)="openQuickAccessCard(card)">
+          <div class="quick-access-icon" [style.color]="card.accent" [style.background]="card.tint">
+            <ion-icon [name]="card.icon"></ion-icon>
+          </div>
+          <div class="quick-access-copy">
+            <span class="quick-access-title">{{ card.title }}</span>
+            <span class="quick-access-subtitle">{{ card.subtitle }}</span>
+          </div>
+        </button>
+      </div>
+
+      <div *ngIf="filteredQuickAccessCards.length === 0" class="quick-access-empty">
+        <ion-icon name="search-outline"></ion-icon>
+        <p>No modules found</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Drop zone shown during long-press dismiss mode -->
+  <div class="fab-drop-zone" *ngIf="dismissMode" [class.drop-zone-over]="overDropZone">
+    <ion-icon name="close-circle-outline"></ion-icon>
+    <span>Release to close</span>
+  </div>
+
+  <!-- Restore pill shown after FAB is dismissed -->
+  <button *ngIf="showFloatingMenuButton && fabHidden" class="fab-restore-pill" (click)="restoreFab()" type="button">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M3 3h8v8H3zm0 10h8v8H3zm10-10h8v8h-8zm0 10h8v8h-8z"/>
+    </svg>
+    <span>Restore menu</span>
+  </button>
+
+  <div
+    *ngIf="showFloatingMenuButton && !fabHidden"
+    class="floating-menu-fab"
+    [class.fab-dismiss-mode]="dismissMode"
+    [style.left.px]="fabX"
+    [style.top.px]="fabY"
+    (pointerdown)="onFabPointerDown($event)"
+    (pointermove)="onFabPointerMove($event)"
+    (pointerup)="onFabPointerUp($event)"
+    (pointercancel)="onFabPointerCancel($event)">
+    <ion-fab-button (click)="onFabClick($event)" aria-label="Open menu">
+      <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M3 3h8v8H3zm0 10h8v8H3zm10-10h8v8h-8zm0 10h8v8h-8z"/>
+      </svg>
+    </ion-fab-button>
+  </div>
 
 </ion-app>

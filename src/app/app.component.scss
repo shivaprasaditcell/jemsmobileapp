@@ -149,3 +149,309 @@ $accent:  #F26622;
     background: rgba(242, 102, 34, 0.08);
   }
 }
+
+.quick-access-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  background: rgba(236, 242, 248, 0.68);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.quick-access-panel {
+  position: relative;
+  width: min(1040px, 100%);
+  max-height: min(88vh, 900px);
+  overflow: auto;
+  border-radius: 24px;
+  background: rgba(250, 252, 255, 0.96);
+  box-shadow: 0 30px 80px rgba(45, 72, 95, 0.22);
+  border: 1px solid rgba(182, 202, 221, 0.55);
+  padding: 18px;
+}
+
+.quick-access-close {
+  position: sticky;
+  top: 0;
+  margin-left: auto;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(61, 80, 98, 0.12);
+  color: #738395;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  ion-icon {
+    font-size: 24px;
+  }
+}
+
+.quick-access-search-wrap {
+  margin: 4px auto 16px;
+  max-width: 540px;
+  height: 50px;
+  border: 1px solid rgba(192, 207, 223, 0.9);
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px rgba(235, 241, 247, 0.7), 0 10px 24px rgba(119, 146, 174, 0.08);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 10px;
+}
+
+.quick-access-search-icon {
+  color: #38718f;
+  font-size: 20px;
+}
+
+.quick-access-search {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #445468;
+  font-size: 15px;
+}
+
+.quick-access-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.quick-access-card {
+  width: 100%;
+  border: 1px solid rgba(199, 214, 228, 0.9);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 250, 255, 0.96));
+  box-shadow: 0 8px 18px rgba(100, 126, 151, 0.08);
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+  cursor: pointer;
+  min-height: 120px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+
+  &:hover,
+  &:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 28px rgba(100, 126, 151, 0.14);
+    border-color: rgba(143, 176, 205, 0.96);
+  }
+
+  &.is-disabled {
+    opacity: 0.76;
+    cursor: default;
+  }
+}
+
+.quick-access-icon {
+  width: 52px;
+  min-width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  ion-icon {
+    font-size: 24px;
+  }
+}
+
+.quick-access-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  width: 100%;
+}
+
+.quick-access-title {
+  color: #1f2940;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.quick-access-subtitle {
+  color: #5f7186;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.quick-access-empty {
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #718398;
+
+  ion-icon {
+    font-size: 30px;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.fab-restore-pill {
+  position: fixed;
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  right: 16px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(18, 88, 117, 0.82);
+  backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  padding: 9px 16px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(18, 88, 117, 0.28);
+  transition: background 0.2s, transform 0.18s;
+
+  &:active {
+    background: rgba(13, 67, 88, 0.92);
+    transform: scale(0.96);
+  }
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+.fab-drop-zone {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(208, 84, 84, 0.10);
+  border: 2px dashed rgba(208, 84, 84, 0.45);
+  border-radius: 999px;
+  padding: 12px 28px;
+  color: #d05454;
+  font-size: 14px;
+  font-weight: 600;
+  pointer-events: none;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+
+  ion-icon { font-size: 22px; }
+
+  &.drop-zone-over {
+    background: rgba(208, 84, 84, 0.22);
+    border-color: rgba(208, 84, 84, 0.85);
+    transform: translateX(-50%) scale(1.1);
+  }
+}
+
+@keyframes fab-wobble {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  20%       { transform: rotate(-10deg) scale(1.12); }
+  40%       { transform: rotate(10deg) scale(1.12); }
+  60%       { transform: rotate(-6deg) scale(1.06); }
+  80%       { transform: rotate(6deg) scale(1.06); }
+}
+
+.floating-menu-fab {
+  position: fixed;
+  z-index: 1000;
+  touch-action: none;
+  user-select: none;
+
+  &.fab-dismiss-mode {
+    animation: fab-wobble 0.45s ease;
+
+    ion-fab-button {
+      --background: #c94040;
+      --background-hover: #b33030;
+    }
+  }
+}
+
+.floating-menu-fab ion-fab-button {
+  --background: #125875;
+  --background-activated: #0d4358;
+  --background-hover: #176784;
+  --color: #ffffff;
+  --box-shadow: 0 12px 24px rgba(18, 88, 117, 0.28);
+  margin: 0;
+}
+
+@media (max-width: 960px) {
+  .quick-access-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .quick-access-overlay {
+    padding: 12px;
+  }
+
+  .quick-access-panel {
+    max-height: 92vh;
+    padding: 14px;
+    border-radius: 22px;
+  }
+
+  .quick-access-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .quick-access-card {
+    min-height: 104px;
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .quick-access-icon {
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+
+    ion-icon {
+      font-size: 20px;
+    }
+  }
+
+  .quick-access-title {
+    font-size: 14px;
+  }
+
+   .quick-access-subtitle {
+    font-size: 11px;
+  }
+
+  .quick-access-search-wrap {
+    height: 46px;
+    margin-top: 8px;
+  }
+}
