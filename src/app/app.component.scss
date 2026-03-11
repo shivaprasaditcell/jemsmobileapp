@@ -3,12 +3,26 @@ $accent:  #F26622;
 
 // ── Profile Header ────────────────────────────────────────────────────────────
 .menu-header {
+  position: relative;
   background: linear-gradient(160deg, $primary 60%, darken($primary, 8%) 100%);
   padding: 48px 20px 24px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
+}
+
+.settings-btn {
+  position: absolute;
+  top: 10px;
+  right: 8px;
+  --color: rgba(255, 255, 255, 0.95);
+  --padding-start: 6px;
+  --padding-end: 6px;
+
+  ion-icon {
+    font-size: 20px;
+  }
 }
 
 .menu-avatar-wrap {

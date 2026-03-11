@@ -1,0 +1,27 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons>
+    <ion-title>Settings</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="settings-content ion-padding">
+
+  <p class="section-label">Quick Access</p>
+
+  <div class="feature-grid">
+
+    <div class="feature-card" (click)="goTo('/tabs/change-password')">
+      <div class="feature-icon-wrap security">
+        <ion-icon name="key-outline"></ion-icon>
+      </div>
+      <div>
+        <p class="feature-title">Change Password</p>
+        <p class="feature-sub">Update your account password securely</p>
+      </div>
+      <ion-icon name="chevron-forward-outline" class="card-arrow"></ion-icon>
+    </div>
+
+  </div>
+
+</ion-content>

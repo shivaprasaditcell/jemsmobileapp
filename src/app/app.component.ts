@@ -51,6 +51,10 @@ export class AppComponent implements OnInit {
     this.router.navigateByUrl(path);
   }
 
+  openQuickAccess(): void {
+    this.navigate('/tabs/settings');
+  }
+
   logout() {
     this.menuCtrl.close();
     this.authService.logout();

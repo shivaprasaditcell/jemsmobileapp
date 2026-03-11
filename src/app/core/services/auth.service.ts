@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject, tap, catchError, of, switchMap } from 'rxjs';
+import { Observable, BehaviorSubject, tap, catchError, of, switchMap, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { StorageService } from './storage.service';
 import { CurrentUser, MenuItem } from '../../models/user.model';
@@ -142,6 +142,20 @@ export class AuthService {
 
   isAdmin(): boolean {
     return this.currentUser$.value?.isAdmin === true;
+  }
+
+  changePassword(currentPassword: string, newPassword: string): Observable<any> {
+    const user = this.currentUser$.value;
+    const email = user?.email;
+    if (!email) {
+      return throwError(() => new Error('User email not found. Please login again.'));
+    }
+
+    return this.http.post<any>(`${environment.apiUrl}userAuth/changepassword`, {
+      UserauthEmail: email,
+      Userauthcurrentpwd: currentPassword,
+      Userauthnewpwd: newPassword
+    });
   }
 
   private mapMenus(raw: any[]): MenuItem[] {

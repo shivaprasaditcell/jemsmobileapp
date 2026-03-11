@@ -8,7 +8,6 @@ export const environment = {
   // Switch back to 'http://localhost:5017/api/' when running the local backend.
   apiUrl: 'http://localhost:5017/api/'
 };
-
 /*
  * For easier debugging in development mode, you can import the following file
  * to ignore zone related error stack frames such as `zone.run`, `zoneDelegate.invokeTask`.

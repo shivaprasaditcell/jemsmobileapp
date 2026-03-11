@@ -4,6 +4,10 @@
 
     <!-- ── Profile Header ──────────────────────────── -->
     <div class="menu-header">
+      <ion-button fill="clear" class="settings-btn" (click)="openQuickAccess()" aria-label="Open quick access">
+        <ion-icon name="settings-outline"></ion-icon>
+      </ion-button>
+
       <div class="menu-avatar-wrap">
         <img
           *ngIf="user?.profilePic && !imgError"

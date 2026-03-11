@@ -56,6 +56,14 @@ const routes: Routes = [
         loadChildren: () => import('../pages/my-workload/my-workload.module').then(m => m.MyWorkloadPageModule)
       },
       {
+        path: 'change-password',
+        loadChildren: () => import('../pages/change-password/change-password.module').then(m => m.ChangePasswordPageModule)
+      },
+      {
+        path: 'settings',
+        loadChildren: () => import('../pages/settings/settings.module').then(m => m.SettingsPageModule)
+      },
+      {
         path: 'mentoring-sessions',
         loadChildren: () => import('../pages/mentoring-sessions/mentoring-sessions.module').then(m => m.MentoringSessionsPageModule)
       },
