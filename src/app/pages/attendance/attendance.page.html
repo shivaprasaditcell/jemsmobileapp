@@ -38,80 +38,234 @@
 
   <div *ngIf="!loading">
 
-    <!-- Stats Bar -->
-    <div class="stats-bar">
-      <div class="stat-chip total">
+    <!-- Tab Segment -->
+    <div class="att-tab-bar">
+      <button class="att-tab" [class.att-tab-active]="activeTab === 'attendance'"
+        (click)="activeTab = 'attendance'">
         <ion-icon name="people-outline"></ion-icon>
-        <span class="stat-label">Total</span>
-        <span class="stat-val">{{ totalCount }}</span>
-      </div>
-      <div class="stat-chip present">
-        <ion-icon name="checkmark-circle-outline"></ion-icon>
-        <span class="stat-label">Present</span>
-        <span class="stat-val">{{ presentCount }}</span>
-      </div>
-      <div class="stat-chip absent">
-        <ion-icon name="close-circle-outline"></ion-icon>
-        <span class="stat-label">Absent</span>
-        <span class="stat-val">{{ absentCount }}</span>
-      </div>
-    </div>
-
-    <!-- Topic selected banner -->
-    <div class="topic-banner" *ngIf="selectedTopic" (click)="showTopicPopup = true">
-      <ion-icon name="book-outline"></ion-icon>
-      <span class="topic-banner-text">{{ topicLabel }}</span>
-      <ion-icon name="chevron-forward-outline" class="topic-banner-arrow"></ion-icon>
-    </div>
-
-    <!-- Mark All Buttons -->
-    <div class="mark-all-row">
-      <button class="mark-btn mark-present-btn" (click)="markAll(true)">
-        <ion-icon name="checkmark-done-outline"></ion-icon>
-        Mark All Present
+        Student Attendance
       </button>
-      <button class="mark-btn mark-absent-btn" (click)="markAll(false)">
-        <ion-icon name="close-circle-outline"></ion-icon>
-        Mark All Absent
+      <button class="att-tab" [class.att-tab-active]="activeTab === 'details'"
+        (click)="activeTab = 'details'" [disabled]="!selectedTopic">
+        <ion-icon name="book-outline"></ion-icon>
+        Topic Details
       </button>
     </div>
 
-    <!-- Active filter chip -->
-    <div class="active-filter-row" *ngIf="filterLetter">
-      <span class="active-filter-chip">
-        <ion-icon name="filter-outline"></ion-icon>
-        Names starting with <strong>{{ filterLetter }}</strong>
-        &nbsp;·&nbsp; {{ filteredStudents.length }} student{{ filteredStudents.length !== 1 ? 's' : '' }}
-      </span>
-      <button class="clear-filter-btn" (click)="clearFilter()">
-        <ion-icon name="close-outline"></ion-icon>
-        Clear
-      </button>
-    </div>
+    <!-- ═══ ATTENDANCE TAB ═══════════════════════════════════════════════════ -->
+    <ng-container *ngIf="activeTab === 'attendance'">
 
-    <!-- Student List -->
-    <div class="student-list">
-      <div
-        class="student-card"
-        *ngFor="let s of filteredStudents"
-        [class.is-present]="s.isPresent"
-        [class.is-absent]="!s.isPresent"
-        (click)="toggle(s)">
+      <!-- Stats Bar -->
+      <div class="stats-bar">
+        <div class="stat-chip total">
+          <ion-icon name="people-outline"></ion-icon>
+          <span class="stat-label">Total</span>
+          <span class="stat-val">{{ totalCount }}</span>
+        </div>
+        <div class="stat-chip present">
+          <ion-icon name="checkmark-circle-outline"></ion-icon>
+          <span class="stat-label">Present</span>
+          <span class="stat-val">{{ presentCount }}</span>
+        </div>
+        <div class="stat-chip absent">
+          <ion-icon name="close-circle-outline"></ion-icon>
+          <span class="stat-label">Absent</span>
+          <span class="stat-val">{{ absentCount }}</span>
+        </div>
+      </div>
 
-        <div class="student-avatar">{{ initials(s.name) }}</div>
+      <!-- Topic selected banner -->
+      <div class="topic-banner" *ngIf="selectedTopic" (click)="showTopicPopup = true">
+        <ion-icon name="book-outline"></ion-icon>
+        <span class="topic-banner-text">{{ topicLabel }}</span>
+        <ion-icon name="chevron-forward-outline" class="topic-banner-arrow"></ion-icon>
+      </div>
 
-        <div class="student-info">
-          <p class="student-name">{{ s.name }}</p>
-          <p class="student-usn">{{ s.usn }}</p>
+      <!-- Mark All Buttons -->
+      <div class="mark-all-row">
+        <button class="mark-btn mark-present-btn" (click)="markAll(true)">
+          <ion-icon name="checkmark-done-outline"></ion-icon>
+          Mark All Present
+        </button>
+        <button class="mark-btn mark-absent-btn" (click)="markAll(false)">
+          <ion-icon name="close-circle-outline"></ion-icon>
+          Mark All Absent
+        </button>
+      </div>
+
+      <!-- Active filter chip -->
+      <div class="active-filter-row" *ngIf="filterLetter">
+        <span class="active-filter-chip">
+          <ion-icon name="filter-outline"></ion-icon>
+          Names starting with <strong>{{ filterLetter }}</strong>
+          &nbsp;·&nbsp; {{ filteredStudents.length }} student{{ filteredStudents.length !== 1 ? 's' : '' }}
+        </span>
+        <button class="clear-filter-btn" (click)="clearFilter()">
+          <ion-icon name="close-outline"></ion-icon>
+          Clear
+        </button>
+      </div>
+
+      <!-- Student List -->
+      <div class="student-list">
+        <div
+          class="student-card"
+          *ngFor="let s of filteredStudents"
+          [class.is-present]="s.isPresent"
+          [class.is-absent]="!s.isPresent"
+          (click)="toggle(s)">
+
+          <div class="student-avatar">{{ initials(s.name) }}</div>
+
+          <div class="student-info">
+            <p class="student-name">{{ s.name }}</p>
+            <p class="student-usn">{{ s.usn }}</p>
+          </div>
+
+          <div class="student-status" [class.present]="s.isPresent" [class.absent]="!s.isPresent">
+            <ion-icon [name]="s.isPresent ? 'checkmark-circle' : 'close-circle'"></ion-icon>
+            <span>{{ s.isPresent ? 'PRESENT' : 'ABSENT' }}</span>
+          </div>
+
+        </div>
+      </div>
+
+    </ng-container>
+
+    <!-- ═══ TOPIC DETAILS TAB ════════════════════════════════════════════════ -->
+    <ng-container *ngIf="activeTab === 'details' && selectedTopic">
+
+      <div class="td-panel">
+
+        <!-- Topic Card -->
+        <div class="td-node-card td-topic">
+          <div class="td-node-header">
+            <ion-icon name="document-text-outline"></ion-icon>
+            <span class="td-node-title">{{ selectedTopic.nodeTitle }}</span>
+            <span class="td-badge td-badge-topic">TOPIC</span>
+          </div>
+          <div class="td-node-desc" *ngIf="hasDescription(selectedTopic)">
+            {{ selectedTopic.nodeDescription }}
+          </div>
+          <!-- Topic Resources -->
+          <div class="td-resources" *ngIf="selectedTopic.attachments?.length">
+            <div class="td-resources-label">
+              <ion-icon name="attach-outline"></ion-icon> RESOURCES
+            </div>
+            <div class="td-file" *ngFor="let f of selectedTopic.attachments">
+              <ion-icon name="document-outline" class="td-file-icon"></ion-icon>
+              <div class="td-file-info">
+                <span class="td-file-name">{{ f.fileName }}</span>
+                <span class="td-file-meta" *ngIf="f.fileSize || f.fileType">
+                  {{ fileSizeLabel(f.fileSize) }}{{ f.fileSize && f.fileType ? ' · ' : '' }}{{ f.fileType || '' }}
+                </span>
+              </div>
+              <a *ngIf="f.fileUrl" [href]="f.fileUrl" target="_blank" class="td-file-dl" (click)="$event.stopPropagation()">
+                <ion-icon name="download-outline"></ion-icon>
+              </a>
+            </div>
+          </div>
         </div>
 
-        <div class="student-status" [class.present]="s.isPresent" [class.absent]="!s.isPresent">
-          <ion-icon [name]="s.isPresent ? 'checkmark-circle' : 'close-circle'"></ion-icon>
-          <span>{{ s.isPresent ? 'PRESENT' : 'ABSENT' }}</span>
+        <!-- Chapter Card -->
+        <div class="td-node-card td-chapter" *ngIf="selectedChapter">
+          <div class="td-node-header">
+            <ion-icon name="folder-outline"></ion-icon>
+            <span class="td-node-title">{{ selectedChapter.nodeTitle }}</span>
+            <span class="td-badge td-badge-chapter">CHAPTER</span>
+          </div>
+          <div class="td-node-desc" *ngIf="hasDescription(selectedChapter)">
+            {{ selectedChapter.nodeDescription }}
+          </div>
+          <div class="td-resources" *ngIf="selectedChapter.attachments?.length">
+            <div class="td-resources-label">
+              <ion-icon name="attach-outline"></ion-icon> RESOURCES
+            </div>
+            <div class="td-file" *ngFor="let f of selectedChapter.attachments">
+              <ion-icon name="document-outline" class="td-file-icon"></ion-icon>
+              <div class="td-file-info">
+                <span class="td-file-name">{{ f.fileName }}</span>
+                <span class="td-file-meta" *ngIf="f.fileSize || f.fileType">
+                  {{ fileSizeLabel(f.fileSize) }}{{ f.fileSize && f.fileType ? ' · ' : '' }}{{ f.fileType || '' }}
+                </span>
+              </div>
+              <a *ngIf="f.fileUrl" [href]="f.fileUrl" target="_blank" class="td-file-dl" (click)="$event.stopPropagation()">
+                <ion-icon name="download-outline"></ion-icon>
+              </a>
+            </div>
+          </div>
+          <p class="td-no-resources" *ngIf="!selectedChapter.attachments?.length">No chapter resources.</p>
+        </div>
+
+        <!-- Mapped Questions -->
+        <div class="td-questions-section">
+
+          <div *ngIf="questionsLoading" class="mq-loading">
+            <ion-skeleton-text animated style="width:100%;height:50px;border-radius:10px;margin-bottom:8px"></ion-skeleton-text>
+            <ion-skeleton-text animated style="width:100%;height:50px;border-radius:10px"></ion-skeleton-text>
+          </div>
+
+          <ng-container *ngIf="!questionsLoading">
+
+            <!-- MCQ Section -->
+            <div class="mq-section" *ngIf="mcqQuestions.length">
+              <div class="mq-section-header">
+                <ion-icon name="list-outline"></ion-icon>
+                <span>MCQ Questions</span>
+                <span class="mq-count">{{ mcqQuestions.length }}</span>
+              </div>
+              <div class="mq-card" *ngFor="let q of mcqQuestions; let i = index">
+                <div class="mq-q-row">
+                  <span class="mq-num">Q{{ i + 1 }}</span>
+                  <span class="mq-text">{{ q.questiontext }}</span>
+                  <span class="mq-marks" *ngIf="q.questionmarks">{{ q.questionmarks }}M</span>
+                </div>
+                <div class="mq-meta" *ngIf="q.difficultyname || q.bloomname">
+                  <span class="mq-tag" *ngIf="q.difficultyname">{{ q.difficultyname }}</span>
+                  <span class="mq-tag" *ngIf="q.bloomname">{{ q.bloomname }}</span>
+                </div>
+                <div class="mq-options" *ngIf="q.options?.length">
+                  <div class="mq-option" *ngFor="let o of q.options" [class.mq-correct]="o.optionlabel === q.answer">
+                    <ion-icon [name]="o.optionlabel === q.answer ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
+                    <span class="mq-option-label">{{ o.optionlabel }}.</span>
+                    <span>{{ o.optiontext }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Descriptive Section -->
+            <div class="mq-section" *ngIf="descriptiveQuestions.length">
+              <div class="mq-section-header">
+                <ion-icon name="document-text-outline"></ion-icon>
+                <span>Descriptive Questions</span>
+                <span class="mq-count">{{ descriptiveQuestions.length }}</span>
+              </div>
+              <div class="mq-card" *ngFor="let q of descriptiveQuestions; let i = index">
+                <div class="mq-q-row">
+                  <span class="mq-num">Q{{ i + 1 }}</span>
+                  <span class="mq-text">{{ q.questiontext }}</span>
+                  <span class="mq-marks" *ngIf="q.questionmarks">{{ q.questionmarks }}M</span>
+                </div>
+                <div class="mq-meta" *ngIf="q.difficultyname || q.bloomname">
+                  <span class="mq-tag" *ngIf="q.difficultyname">{{ q.difficultyname }}</span>
+                  <span class="mq-tag" *ngIf="q.bloomname">{{ q.bloomname }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- No questions -->
+            <div class="mq-empty" *ngIf="!mcqQuestions.length && !descriptiveQuestions.length">
+              <ion-icon name="help-circle-outline"></ion-icon>
+              <span>No questions mapped to this topic</span>
+            </div>
+
+          </ng-container>
         </div>
 
       </div>
-    </div>
+
+    </ng-container>
 
   </div>
 

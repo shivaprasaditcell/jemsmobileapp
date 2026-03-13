@@ -1,0 +1,279 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons>
+    <ion-title>Timetable</ion-title>
+  </ion-toolbar>
+
+  <!-- Tab segment -->
+  <ion-toolbar color="primary">
+    <ion-segment [(ngModel)]="activeTab" (ionChange)="onTabChange(activeTab)">
+      <ion-segment-button value="timetable">
+        <ion-icon name="calendar-outline"></ion-icon>
+        <ion-label>Schedule</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="attendance">
+        <ion-icon name="bar-chart-outline"></ion-icon>
+        <ion-label>Attendance</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="tt-content">
+
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Error -->
+  <div class="tt-error-state" *ngIf="error">
+    <ion-icon name="cloud-offline-outline"></ion-icon>
+    <p>{{ error }}</p>
+  </div>
+
+  <ng-container *ngIf="!error">
+
+    <!-- Session selector (hidden – auto-selects current session) -->
+    <div class="tt-session-bar" *ngIf="false">
+      <ion-select
+        [(ngModel)]="selectedSessionId"
+        (ionChange)="onSessionChange()"
+        interface="action-sheet"
+        placeholder="Select session"
+        class="tt-session-select">
+        <ion-select-option *ngFor="let s of sessions"
+          [value]="s?.sessionslnum || s?.Sessionslnum">
+          {{ sessionLabel(s) }}
+        </ion-select-option>
+      </ion-select>
+    </div>
+
+    <!-- Loading skeleton -->
+    <div class="tt-skeleton" *ngIf="loading">
+      <ion-skeleton-text animated style="height:60px;border-radius:14px;margin-bottom:12px"></ion-skeleton-text>
+      <ion-skeleton-text animated style="height:120px;border-radius:14px;margin-bottom:10px"></ion-skeleton-text>
+      <ion-skeleton-text animated style="height:120px;border-radius:14px;margin-bottom:10px"></ion-skeleton-text>
+      <ion-skeleton-text animated style="height:120px;border-radius:14px"></ion-skeleton-text>
+    </div>
+
+    <ng-container *ngIf="!loading && selectedSessionId">
+
+      <!-- ══ TIMETABLE TAB ══════════════════════════════════════════ -->
+      <div *ngIf="activeTab === 'timetable'" class="tt-panel">
+
+        <!-- Week chips -->
+        <div class="tt-week-section">
+          <div class="tt-week-scroll">
+            <button
+              *ngFor="let w of weeks"
+              class="tt-week-chip"
+              [class.selected]="selectedWeek === w.weekNumber"
+              (click)="onWeekChange(w.weekNumber)">
+              W{{ w.weekNumber }}
+            </button>
+          </div>
+          <div class="tt-week-range" *ngIf="currentWeekInfo?.weekStartDate">
+            <ion-icon name="calendar-outline"></ion-icon>
+            <span>
+              {{ currentWeekInfo!.weekStartDate | date:'dd MMM' }} –
+              {{ currentWeekInfo!.weekEndDate | date:'dd MMM yyyy' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="tt-legend">
+          <span class="leg present"><ion-icon name="checkmark-circle"></ion-icon> Present</span>
+          <span class="leg absent"><ion-icon name="close-circle"></ion-icon> Absent</span>
+          <span class="leg not_marked"><ion-icon name="help-circle"></ion-icon> Not Marked</span>
+          <span class="leg upcoming"><ion-icon name="time"></ion-icon> Upcoming</span>
+        </div>
+
+        <!-- Empty -->
+        <div class="tt-empty" *ngIf="!slotsByDay.length">
+          <ion-icon name="calendar-outline"></ion-icon>
+          <p>No classes scheduled for Week {{ selectedWeek }}.</p>
+        </div>
+
+        <!-- Day groups -->
+        <div class="tt-days" *ngIf="slotsByDay.length">
+          <div class="tt-day-group" *ngFor="let dg of slotsByDay">
+
+            <div class="tt-day-header">
+              <span class="tt-day-name">{{ dg.dayName }}</span>
+              <span class="tt-day-badge">{{ dg.slots.length }} class{{ dg.slots.length !== 1 ? 'es' : '' }}</span>
+            </div>
+
+            <div class="tt-slot" *ngFor="let slot of dg.slots" [ngClass]="slot.attendanceStatus">
+
+              <!-- Left time strip -->
+              <div class="tt-slot-time">
+                <span>{{ slot.startTime }}</span>
+                <span class="tt-slot-divider"></span>
+                <span>{{ slot.endTime }}</span>
+              </div>
+
+              <!-- Body -->
+              <div class="tt-slot-body">
+                <div class="tt-slot-header">
+                  <div>
+                    <h4 class="tt-subject">{{ slot.subjectName }}</h4>
+                    <span class="tt-code" *ngIf="slot.subjectCode">{{ slot.subjectCode }}</span>
+                  </div>
+                  <span class="tt-badge" [ngClass]="slot.attendanceStatus">
+                    <ion-icon [name]="statusIcon(slot.attendanceStatus)"></ion-icon>
+                    {{ statusLabel(slot.attendanceStatus) }}
+                  </span>
+                </div>
+
+                <div class="tt-slot-meta">
+                  <span *ngIf="slot.activityType">
+                    <ion-icon name="school-outline"></ion-icon>{{ slot.activityType }}
+                  </span>
+                  <span *ngIf="slot.roomNumber">
+                    <ion-icon name="location-outline"></ion-icon>{{ slot.roomNumber }}
+                  </span>
+                  <span *ngIf="slot.facultyName">
+                    <ion-icon name="person-outline"></ion-icon>{{ slot.facultyName }}
+                  </span>
+                  <span *ngIf="slot.scheduledDate">
+                    <ion-icon name="calendar-outline"></ion-icon>{{ slot.scheduledDate | date:'dd MMM yyyy' }}
+                  </span>
+                  <span *ngIf="!slot.scheduledDate && slot.expectedDate">
+                    <ion-icon name="calendar-outline"></ion-icon>Expected: {{ slot.expectedDate | date:'dd MMM yyyy' }}
+                  </span>
+                </div>
+
+                <div class="tt-topic" *ngIf="slot.topicTitle">
+                  <ion-icon name="book-outline"></ion-icon>
+                  <span><strong>Topic: </strong>{{ slot.topicTitle }}</span>
+                  <ion-badge *ngIf="slot.isTopicCompleted" color="success">Done</ion-badge>
+                </div>
+
+                <div class="tt-info-strip not_marked" *ngIf="slot.attendanceStatus === 'not_marked'">
+                  <ion-icon name="information-circle-outline"></ion-icon>
+                  Attendance not yet recorded for this class.
+                </div>
+
+                <div class="tt-info-strip not_conducted" *ngIf="slot.attendanceStatus === 'not_conducted'">
+                  <ion-icon name="information-circle-outline"></ion-icon>
+                  This class was not conducted.
+                </div>
+
+                <p class="tt-remarks" *ngIf="slot.attendanceRemarks">
+                  <ion-icon name="chatbubble-outline"></ion-icon> {{ slot.attendanceRemarks }}
+                </p>
+
+                <!-- Live Test Banner -->
+                <div class="tt-quiz-strip" *ngIf="activeQuizFor(slot) as quiz">
+                  <ion-icon name="alarm-outline"></ion-icon>
+                  <div class="tt-quiz-info">
+                    <span class="tt-quiz-live">LIVE TEST</span>
+                    <span>{{ quiz.questionCount }} questions &bull; {{ quiz.durationMinutes }} min</span>
+                  </div>
+                  <ion-button size="small" color="danger" fill="solid"
+                              (click)="takeTest(quiz.sessionId); $event.stopPropagation()">
+                    <ion-icon name="play" slot="start"></ion-icon>
+                    Take Test
+                  </ion-button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ ATTENDANCE TAB ════════════════════════════════════════ -->
+      <div *ngIf="activeTab === 'attendance'" class="tt-panel">
+
+        <!-- Overall KPI strip -->
+        <div class="tt-kpi-row" *ngIf="attendanceSummary">
+          <div class="tt-kpi">
+            <span class="tt-kpi-val" [style.color]="overallPctColor">{{ overallPct | number:'1.1-1' }}%</span>
+            <span class="tt-kpi-lbl">Overall</span>
+          </div>
+          <div class="tt-kpi">
+            <span class="tt-kpi-val">{{ overallTotal }}</span>
+            <span class="tt-kpi-lbl">Marked</span>
+          </div>
+          <div class="tt-kpi">
+            <span class="tt-kpi-val" style="color:#4d9c58">{{ overallPresent }}</span>
+            <span class="tt-kpi-lbl">Present</span>
+          </div>
+          <div class="tt-kpi">
+            <span class="tt-kpi-val" style="color:#eb445a">{{ overallAbsent }}</span>
+            <span class="tt-kpi-lbl">Absent</span>
+          </div>
+        </div>
+
+        <!-- Empty -->
+        <div class="tt-empty" *ngIf="!subjects.length">
+          <ion-icon name="bar-chart-outline"></ion-icon>
+          <p>No attendance records found for this session.</p>
+        </div>
+
+        <!-- Subject cards -->
+        <div class="tt-att-card" *ngFor="let sub of subjects">
+
+          <div class="tt-att-head">
+            <div>
+              <h4 class="tt-att-name">{{ sub.subjectName }}</h4>
+              <span class="tt-att-code" *ngIf="sub.subjectCode">{{ sub.subjectCode }}</span>
+            </div>
+            <span class="tt-status-badge" [style.background]="subjectStatusColor(sub.status) + '22'"
+              [style.color]="subjectStatusColor(sub.status)">
+              {{ sub.status }}
+            </span>
+          </div>
+
+          <!-- Progress bar -->
+          <div class="tt-progress-wrap">
+            <div class="tt-progress-track">
+              <div class="tt-progress-fill"
+                [style.width.%]="sub.attendancePercentage"
+                [style.background]="subjectStatusColor(sub.status)">
+              </div>
+            </div>
+            <span class="tt-pct" [style.color]="subjectStatusColor(sub.status)">
+              {{ sub.attendancePercentage | number:'1.1-1' }}%
+            </span>
+          </div>
+
+          <div class="tt-att-stats">
+            <div class="tt-stat">
+              <span class="tt-stat-val">{{ sub.totalClasses }}</span>
+              <span class="tt-stat-lbl">Marked</span>
+            </div>
+            <div class="tt-stat">
+              <span class="tt-stat-val" style="color:#4d9c58">{{ sub.presentClasses }}</span>
+              <span class="tt-stat-lbl">Present</span>
+            </div>
+            <div class="tt-stat">
+              <span class="tt-stat-val" style="color:#eb445a">{{ sub.absentClasses }}</span>
+              <span class="tt-stat-lbl">Absent</span>
+            </div>
+          </div>
+
+          <div class="tt-faculty" *ngIf="sub.facultyName">
+            <ion-icon name="person-circle-outline"></ion-icon>
+            <span>{{ sub.facultyName }}</span>
+          </div>
+
+          <div class="tt-att-warn" *ngIf="sub.status !== 'Good'"
+            [style.background]="subjectStatusColor(sub.status) + '15'"
+            [style.borderColor]="subjectStatusColor(sub.status) + '40'"
+            [style.color]="subjectStatusColor(sub.status)">
+            <ion-icon name="warning-outline"></ion-icon>
+            <span *ngIf="sub.status === 'Low'">Below 75% — attend more classes to avoid shortage.</span>
+            <span *ngIf="sub.status === 'Critical'">Critical shortage! Contact your mentor immediately.</span>
+          </div>
+
+        </div>
+
+      </div>
+
+    </ng-container>
+  </ng-container>
+
+</ion-content>

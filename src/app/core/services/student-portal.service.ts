@@ -96,9 +96,6 @@ export class StudentPortalService {
       map(profile => {
         const resolvedId = profile?.studentId || candidate;
         this.storage.set(this.PROFILE_ID_KEY, String(resolvedId));
-        if (this.authService.getCurrentUser()?.studentId !== resolvedId) {
-          this.authService.updateCurrentUser({ studentId: resolvedId });
-        }
         return resolvedId;
       }),
       catchError(() => this.tryProfileCandidate(candidateIds, index + 1))
@@ -108,9 +105,6 @@ export class StudentPortalService {
   private buildCandidateIds(user: CurrentUser, cachedId: number): number[] {
     const raw = [
       cachedId,
-      user.studentId,
-      user.studentSlnum,
-      user.studentAuthId,
       user.userId
     ];
 

@@ -11,6 +11,93 @@
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
 
+  <!-- ════════════════════════════════════════════════
+       STUDENT DASHBOARD
+       ════════════════════════════════════════════════ -->
+  <ng-container *ngIf="isStudent">
+
+    <!-- Loading skeleton -->
+    <div *ngIf="studentDashboardLoading">
+      <ion-skeleton-text animated style="width:100%;height:160px;border-radius:20px;margin-bottom:14px"></ion-skeleton-text>
+      <ion-skeleton-text animated style="width:100%;height:90px;border-radius:20px;margin-bottom:14px"></ion-skeleton-text>
+      <ion-skeleton-text animated style="width:100%;height:200px;border-radius:20px"></ion-skeleton-text>
+    </div>
+
+    <!-- Error -->
+    <div class="std-error" *ngIf="!studentDashboardLoading && studentDashboardError">
+      <ion-icon name="cloud-offline-outline"></ion-icon>
+      <p>{{ studentDashboardError }}</p>
+    </div>
+
+    <ng-container *ngIf="!studentDashboardLoading && studentProfile as p">
+
+      <!-- ── Hero card ── -->
+      <div class="std-hero">
+        <div class="std-hero-avatar">
+          {{ (p.basicDetails.fullName[0] || 'S').toUpperCase() }}
+        </div>
+        <div class="std-hero-info">
+          <h2 class="std-hero-name">{{ p.basicDetails.fullName }}</h2>
+          <p class="std-hero-course">{{ p.courseDetails.courseName }}</p>
+          <div class="std-hero-tags">
+            <span class="std-tag">{{ p.basicDetails.usn }}</span>
+            <span class="std-tag">{{ p.courseDetails.semester }}</span>
+            <span class="std-tag">{{ p.courseDetails.batch }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Attendance summary ── -->
+      <div class="std-stat-row" *ngIf="studentAttendance">
+        <div class="std-stat-card">
+          <div class="std-stat-ring-wrap">
+            <svg viewBox="0 0 44 44" class="std-ring">
+              <circle cx="22" cy="22" r="18" fill="none" stroke="#e8edf2" stroke-width="4"/>
+              <circle cx="22" cy="22" r="18" fill="none"
+                [attr.stroke]="attendanceColor" stroke-width="4"
+                stroke-linecap="round"
+                [attr.stroke-dasharray]="113.1"
+                [attr.stroke-dashoffset]="113.1 - (113.1 * attendancePctSafe / 100)"
+                transform="rotate(-90 22 22)"/>
+            </svg>
+            <span class="std-ring-label" [style.color]="attendanceColor">{{ attendancePctSafe | number:'1.0-0' }}%</span>
+          </div>
+          <div class="std-stat-text">
+            <strong>Attendance</strong>
+            <span>{{ studentAttendance.presentClasses }}/{{ studentAttendance.totalClasses }} classes</span>
+          </div>
+        </div>
+        <div class="std-stat-card std-stat-card--alt" (click)="router.navigateByUrl('/tabs/student-fees')">
+          <ion-icon name="card-outline" class="std-stat-icon" style="color:#ed7a1c"></ion-icon>
+          <div class="std-stat-text">
+            <strong>Fee</strong>
+            <span>{{ studentFees.length > 0 ? studentFees.length + ' record(s)' : 'No records' }}</span>
+          </div>
+          <ion-icon name="chevron-forward-outline" class="std-stat-arrow"></ion-icon>
+        </div>
+      </div>
+
+      <!-- ── Quick access grid ── -->
+      <div class="std-section-title">Quick Access</div>
+      <div class="std-grid">
+        <button class="std-grid-item" *ngFor="let item of studentMenuItems"
+          (click)="router.navigateByUrl(item.route)">
+          <div class="std-grid-icon" [style.color]="item.accent"
+            [style.background]="item.accent + '22'">
+            <ion-icon [name]="item.icon"></ion-icon>
+          </div>
+          <span class="std-grid-label">{{ item.label }}</span>
+        </button>
+      </div>
+
+    </ng-container>
+  </ng-container>
+
+  <!-- ════════════════════════════════════════════════
+       STAFF / ADMIN DASHBOARD
+       ════════════════════════════════════════════════ -->
+  <ng-container *ngIf="!isStudent">
+
   <!-- ── Biometric Card ──────────────────────────── -->
   <div class="bio-card" *ngIf="!bioLoading && biometric">
 
@@ -179,6 +266,8 @@
     <ion-skeleton-text animated style="width:55%;height:14px;border-radius:6px;margin-bottom:8px"></ion-skeleton-text>
     <ion-skeleton-text animated style="width:100%;height:60px;border-radius:12px"></ion-skeleton-text>
   </div>
+
+  </ng-container> <!-- /!isStudent -->
 
 </ion-content>
 

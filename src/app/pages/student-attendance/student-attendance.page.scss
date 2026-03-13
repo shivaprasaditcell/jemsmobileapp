@@ -1,0 +1,130 @@
+$primary: #125875;
+
+.att-content {
+  --background: #f0f4f8;
+}
+
+.att-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 40px 16px;
+  color: #7a92a0;
+  text-align: center;
+  ion-icon { font-size: 40px; color: #F26622; }
+  h3 { margin: 0; color: #1a2d3a; }
+  p { margin: 0; font-size: 13px; }
+}
+
+// ── Donut ──────────────────────────────────────────────────────────────────────
+.att-donut-card {
+  position: relative;
+  background: #fff;
+  border-radius: 20px;
+  padding: 28px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(18, 88, 117, 0.1);
+}
+
+.att-donut-svg {
+  width: 180px;
+  height: 180px;
+}
+
+.att-donut-center {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.att-pct {
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.att-pct-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #7a92a0;
+  margin-top: 4px;
+}
+
+// ── Stats ──────────────────────────────────────────────────────────────────────
+.att-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.att-stat {
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px 10px;
+  text-align: center;
+  box-shadow: 0 3px 10px rgba(18, 88, 117, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  &--total  .att-stat-val { color: $primary; }
+  &--present .att-stat-val { color: #4d9c58; }
+  &--absent  .att-stat-val { color: #eb445a; }
+}
+
+.att-stat-val {
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.att-stat-lbl {
+  font-size: 11px;
+  font-weight: 600;
+  color: #7a92a0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+// ── Banner ─────────────────────────────────────────────────────────────────────
+.att-banner {
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+
+  ion-icon { font-size: 24px; flex-shrink: 0; margin-top: 2px; }
+
+  strong { font-size: 14px; display: block; margin-bottom: 3px; }
+  p { margin: 0; font-size: 12px; opacity: 0.85; }
+
+  &--ok {
+    background: rgba(77, 156, 88, 0.12);
+    border: 1px solid rgba(77, 156, 88, 0.3);
+    color: #2e7d34;
+    ion-icon { color: #4d9c58; }
+  }
+
+  &--warn {
+    background: rgba(237, 122, 28, 0.12);
+    border: 1px solid rgba(237, 122, 28, 0.3);
+    color: #b85c00;
+    ion-icon { color: #ed7a1c; }
+  }
+
+  &--low {
+    background: rgba(235, 68, 90, 0.12);
+    border: 1px solid rgba(235, 68, 90, 0.3);
+    color: #c0392b;
+    ion-icon { color: #eb445a; }
+  }
+}

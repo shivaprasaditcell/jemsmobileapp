@@ -1,0 +1,458 @@
+$primary: #125875;
+$accent:  #F26622;
+$present: #4d9c58;
+$absent:  #eb445a;
+$warn:    #ed7a1c;
+
+.tt-content { --background: #f0f4f8; }
+
+// ── Session bar ────────────────────────────────────────────────────────────────
+.tt-session-bar {
+  padding: 12px 16px 4px;
+  background: #fff;
+  border-bottom: 1px solid #e8edf2;
+}
+
+.tt-session-select {
+  --padding-start: 0;
+  --padding-end: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: $primary;
+  width: 100%;
+}
+
+// ── Skeleton ───────────────────────────────────────────────────────────────────
+.tt-skeleton { padding: 16px; }
+
+// ── Error ──────────────────────────────────────────────────────────────────────
+.tt-error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 48px 16px;
+  color: #7a92a0;
+  text-align: center;
+  ion-icon { font-size: 40px; color: $accent; }
+  p { margin: 0; font-size: 13px; }
+}
+
+// ── Panel wrapper ──────────────────────────────────────────────────────────────
+.tt-panel { padding: 12px 16px 80px; }
+
+// ── Week selector ──────────────────────────────────────────────────────────────
+.tt-week-section { margin-bottom: 10px; }
+
+.tt-week-scroll {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+
+.tt-week-chip {
+  flex-shrink: 0;
+  height: 32px;
+  min-width: 40px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(18, 88, 117, 0.2);
+  background: #fff;
+  color: #5f7a8a;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &.selected {
+    background: $primary;
+    border-color: $primary;
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(18, 88, 117, 0.3);
+  }
+}
+
+.tt-week-range {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #7a92a0;
+  margin-top: 6px;
+  ion-icon { font-size: 14px; }
+}
+
+// ── Legend ─────────────────────────────────────────────────────────────────────
+.tt-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.leg {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #7a92a0;
+
+  ion-icon { font-size: 13px; }
+
+  &.present ion-icon   { color: $present; }
+  &.absent ion-icon    { color: $absent; }
+  &.not_marked ion-icon { color: $warn; }
+  &.upcoming ion-icon  { color: $primary; }
+}
+
+// ── Empty state ────────────────────────────────────────────────────────────────
+.tt-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 48px 16px;
+  color: #7a92a0;
+  text-align: center;
+  ion-icon { font-size: 40px; color: rgba(18, 88, 117, 0.3); }
+  p { margin: 0; font-size: 13px; }
+}
+
+// ── Day group ──────────────────────────────────────────────────────────────────
+.tt-days { display: flex; flex-direction: column; gap: 16px; }
+
+.tt-day-group {}
+
+.tt-day-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.tt-day-name {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: $primary;
+}
+
+.tt-day-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: #7a92a0;
+}
+
+// ── Slot card ──────────────────────────────────────────────────────────────────
+.tt-slot {
+  display: flex;
+  background: #fff;
+  border-radius: 14px;
+  margin-bottom: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(18, 88, 117, 0.07);
+  border-left: 4px solid #dce6ec;
+
+  &.present     { border-left-color: $present; }
+  &.absent      { border-left-color: $absent; }
+  &.not_marked  { border-left-color: $warn; }
+  &.not_conducted { border-left-color: #b0c4d0; }
+  &.upcoming    { border-left-color: $primary; }
+}
+
+.tt-slot-time {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 10px;
+  min-width: 56px;
+  background: rgba(18, 88, 117, 0.04);
+  gap: 2px;
+
+  span {
+    font-size: 11px;
+    font-weight: 700;
+    color: #3a5060;
+    white-space: nowrap;
+  }
+}
+
+.tt-slot-divider {
+  width: 16px;
+  height: 1px;
+  background: #b0c4d0;
+  margin: 2px 0;
+  &span { display: block; }
+}
+
+.tt-slot-body { flex: 1; padding: 12px; min-width: 0; }
+
+.tt-slot-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.tt-subject {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a2d3a;
+  margin: 0 0 2px;
+  line-height: 1.3;
+}
+
+.tt-code {
+  font-size: 11px;
+  font-weight: 600;
+  color: #7a92a0;
+}
+
+.tt-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  ion-icon { font-size: 13px; }
+
+  &.present     { background: rgba(77,156,88,0.12); color: $present; }
+  &.absent      { background: rgba(235,68,90,0.12); color: $absent; }
+  &.not_marked  { background: rgba(237,122,28,0.12); color: $warn; }
+  &.not_conducted { background: rgba(176,196,208,0.2); color: #7a92a0; }
+  &.upcoming    { background: rgba(18,88,117,0.1); color: $primary; }
+}
+
+.tt-slot-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 6px;
+
+  span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: #7a92a0;
+    ion-icon { font-size: 13px; }
+  }
+}
+
+.tt-topic {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  background: rgba(18, 88, 117, 0.05);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin: 6px 0;
+  font-size: 12px;
+  color: #2a3f50;
+
+  ion-icon { font-size: 14px; color: $primary; flex-shrink: 0; margin-top: 1px; }
+  ion-badge { margin-left: auto; flex-shrink: 0; }
+}
+
+.tt-info-strip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 12px;
+  margin-top: 6px;
+
+  ion-icon { font-size: 14px; flex-shrink: 0; }
+
+  &.not_marked  { background: rgba(237,122,28,0.1); color: #b85c00; }
+  &.not_conducted { background: rgba(176,196,208,0.2); color: #5f7a8a; }
+}
+
+.tt-remarks {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #5f7a8a;
+  margin: 6px 0 0;
+  ion-icon { font-size: 14px; }
+}
+
+// ── KPI row ────────────────────────────────────────────────────────────────────
+.tt-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.tt-kpi {
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px 6px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(18, 88, 117, 0.07);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.tt-kpi-val {
+  font-size: 20px;
+  font-weight: 800;
+  color: $primary;
+  line-height: 1;
+}
+
+.tt-kpi-lbl {
+  font-size: 10px;
+  font-weight: 600;
+  color: #7a92a0;
+  text-transform: uppercase;
+}
+
+// ── Attendance subject cards ────────────────────────────────────────────────────
+.tt-att-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 10px;
+  box-shadow: 0 3px 10px rgba(18, 88, 117, 0.08);
+}
+
+.tt-att-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.tt-att-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a2d3a;
+  margin: 0 0 2px;
+}
+
+.tt-att-code {
+  font-size: 11px;
+  color: #7a92a0;
+  font-weight: 600;
+}
+
+.tt-status-badge {
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.tt-progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.tt-progress-track {
+  flex: 1;
+  height: 8px;
+  background: #e8edf2;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.tt-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.tt-pct {
+  font-size: 13px;
+  font-weight: 700;
+  min-width: 40px;
+  text-align: right;
+}
+
+.tt-att-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.tt-stat {
+  text-align: center;
+  background: #f6f9fb;
+  border-radius: 10px;
+  padding: 8px 4px;
+}
+
+.tt-stat-val {
+  display: block;
+  font-size: 18px;
+  font-weight: 800;
+  color: $primary;
+  line-height: 1;
+}
+
+.tt-stat-lbl {
+  display: block;
+  font-size: 10px;
+  font-weight: 600;
+  color: #7a92a0;
+  text-transform: uppercase;
+  margin-top: 3px;
+}
+
+.tt-faculty {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #5f7a8a;
+  margin-bottom: 8px;
+  ion-icon { font-size: 16px; color: $primary; }
+}
+
+.tt-att-warn {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  border-radius: 10px;
+  border: 1px solid;
+  padding: 10px;
+  font-size: 12px;
+  font-weight: 500;
+  ion-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+}
+
+/* ── Live Quiz Strip ── */
+.tt-quiz-strip {
+  display: flex; align-items: center; gap: 10px;
+  background: linear-gradient(135deg, #fff1f1, #ffe5e5);
+  border: 1.5px solid #eb445a; border-radius: 10px;
+  padding: 8px 12px; margin-top: 10px;
+  animation: quiz-pulse 2s ease-in-out infinite;
+}
+.tt-quiz-strip ion-icon { font-size: 22px; color: #eb445a; flex-shrink: 0; }
+.tt-quiz-info { display: flex; flex-direction: column; flex: 1; font-size: 12px; }
+.tt-quiz-live { font-weight: 700; color: #eb445a; letter-spacing: 1px; font-size: 11px; }
+.tt-quiz-info span:last-child { color: #555; }
+@keyframes quiz-pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(235,68,90,.3); } 50% { box-shadow: 0 0 0 6px rgba(235,68,90,0); } }

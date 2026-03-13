@@ -1,0 +1,80 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons>
+    <ion-title>Attendance</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="att-content ion-padding">
+
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Error -->
+  <div class="att-error" *ngIf="!loading && error">
+    <ion-icon name="cloud-offline-outline"></ion-icon>
+    <h3>Unable to load attendance</h3>
+    <p>{{ error }}</p>
+  </div>
+
+  <!-- Skeleton -->
+  <div *ngIf="loading">
+    <ion-skeleton-text animated style="width:100%;height:260px;border-radius:20px;margin-bottom:14px"></ion-skeleton-text>
+    <ion-skeleton-text animated style="width:100%;height:140px;border-radius:20px"></ion-skeleton-text>
+  </div>
+
+  <ng-container *ngIf="!loading && attendance as a">
+
+    <!-- ── Donut card ── -->
+    <div class="att-donut-card">
+      <svg viewBox="0 0 120 120" class="att-donut-svg">
+        <circle cx="60" cy="60" r="52" fill="none" stroke="#e8edf2" stroke-width="10"/>
+        <circle cx="60" cy="60" r="52" fill="none"
+          [attr.stroke]="pctColor" stroke-width="10"
+          stroke-linecap="round"
+          [attr.stroke-dasharray]="326.7"
+          [attr.stroke-dashoffset]="strokeDashoffset"
+          transform="rotate(-90 60 60)"
+          style="transition: stroke-dashoffset 0.6s ease"/>
+      </svg>
+      <div class="att-donut-center">
+        <span class="att-pct" [style.color]="pctColor">{{ pct | number:'1.0-1' }}%</span>
+        <span class="att-pct-label">Attendance</span>
+      </div>
+    </div>
+
+    <!-- ── Stats strip ── -->
+    <div class="att-stats">
+      <div class="att-stat att-stat--total">
+        <span class="att-stat-val">{{ a.totalClasses }}</span>
+        <span class="att-stat-lbl">Total</span>
+      </div>
+      <div class="att-stat att-stat--present">
+        <span class="att-stat-val">{{ a.presentClasses }}</span>
+        <span class="att-stat-lbl">Present</span>
+      </div>
+      <div class="att-stat att-stat--absent">
+        <span class="att-stat-val">{{ a.absentClasses }}</span>
+        <span class="att-stat-lbl">Absent</span>
+      </div>
+    </div>
+
+    <!-- ── Status banner ── -->
+    <div class="att-banner" [class.att-banner--ok]="pct >= 75"
+      [class.att-banner--warn]="pct >= 60 && pct < 75"
+      [class.att-banner--low]="pct < 60">
+      <ion-icon [name]="pct >= 75 ? 'checkmark-circle-outline' : pct >= 60 ? 'warning-outline' : 'close-circle-outline'"></ion-icon>
+      <div>
+        <strong *ngIf="pct >= 75">Good Standing</strong>
+        <strong *ngIf="pct >= 60 && pct < 75">Below Requirement</strong>
+        <strong *ngIf="pct < 60">Attendance Critical</strong>
+        <p *ngIf="pct >= 75">Your attendance meets the 75% requirement.</p>
+        <p *ngIf="pct >= 60 && pct < 75">Attendance must be at least 75%. Improve it soon.</p>
+        <p *ngIf="pct < 60">Attendance is critically low. Contact your mentor immediately.</p>
+      </div>
+    </div>
+
+  </ng-container>
+
+</ion-content>

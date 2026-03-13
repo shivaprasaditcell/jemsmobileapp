@@ -79,7 +79,7 @@ export class AuthService {
   }
 
   studentLogin(username: string, password: string): Observable<any> {
-    return this.http.post<any>(`${environment.apiUrl}StudentPortal/login`, {
+    return this.http.post<any>(`${environment.apiUrl}studentauth/login`, {
       srNumber: username,
       password,
       rememberMe: true

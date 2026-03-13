@@ -1,7 +1,7 @@
 <ion-header>
   <ion-toolbar color="primary">
     <ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons>
-    <ion-title>Personal Info</ion-title>
+    <ion-title>Personal Details</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -10,77 +10,169 @@
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
 
-  <div class="student-empty" *ngIf="!loading && error">
+  <!-- Error -->
+  <div class="sp-empty" *ngIf="!loading && error">
     <ion-icon name="cloud-offline-outline"></ion-icon>
     <h3>Unable to load profile</h3>
     <p>{{ error }}</p>
   </div>
 
-  <div class="student-skeleton" *ngIf="loading">
-    <ion-skeleton-text animated style="width:100%;height:140px;border-radius:24px"></ion-skeleton-text>
-    <ion-skeleton-text animated style="width:100%;height:220px;border-radius:24px;margin-top:16px"></ion-skeleton-text>
+  <!-- Skeleton -->
+  <div *ngIf="loading">
+    <ion-skeleton-text animated style="width:100%;height:120px;border-radius:20px;margin-bottom:14px"></ion-skeleton-text>
+    <ion-skeleton-text animated style="width:100%;height:200px;border-radius:20px;margin-bottom:14px"></ion-skeleton-text>
+    <ion-skeleton-text animated style="width:100%;height:160px;border-radius:20px"></ion-skeleton-text>
   </div>
 
-  <ng-container *ngIf="!loading && profile as data">
-    <section class="student-card student-hero-card">
-      <p class="eyebrow">Student</p>
-      <h2>{{ data.basicDetails.fullName }}</h2>
-      <p>{{ data.courseDetails.courseName }}</p>
-      <div class="hero-tags">
-        <span>{{ data.basicDetails.usn || 'USN N/A' }}</span>
-        <span>{{ data.courseDetails.srNumber || 'SR N/A' }}</span>
-        <span>{{ data.courseDetails.semester || 'Semester N/A' }}</span>
-      </div>
-    </section>
+  <ng-container *ngIf="!loading && profile as d">
 
-    <section class="student-card">
-      <div class="section-head">
-        <h3>Basic Details</h3>
-      </div>
-      <div class="info-grid">
-        <div class="info-item"><span>Date of Birth</span><strong>{{ data.basicDetails.dob | date:'dd MMM yyyy' }}</strong></div>
-        <div class="info-item"><span>Gender</span><strong>{{ data.basicDetails.gender || 'N/A' }}</strong></div>
-        <div class="info-item"><span>Phone</span><strong>{{ data.basicDetails.phone || 'N/A' }}</strong></div>
-        <div class="info-item"><span>Email</span><strong>{{ data.basicDetails.email || 'N/A' }}</strong></div>
-        <div class="info-item"><span>Nationality</span><strong>{{ data.basicDetails.nationality || 'N/A' }}</strong></div>
-        <div class="info-item"><span>Blood Group</span><strong>{{ data.basicDetails.bloodGroup || 'N/A' }}</strong></div>
-        <div class="info-item"><span>Category</span><strong>{{ data.basicDetails.category || 'N/A' }}</strong></div>
-        <div class="info-item"><span>Mother Tongue</span><strong>{{ data.basicDetails.motherTongue || 'N/A' }}</strong></div>
-      </div>
-    </section>
-
-    <section class="student-card" *ngIf="data.parents?.length">
-      <div class="section-head">
-        <h3>Parents</h3>
-      </div>
-      <div class="stack-list">
-        <div class="stack-card" *ngFor="let parent of data.parents; trackBy: trackByIndex">
-          <div class="stack-top">
-            <strong>{{ parent.type }}</strong>
-            <span>{{ parent.occupation || 'Occupation N/A' }}</span>
-          </div>
-          <h4>{{ parent.name }}</h4>
-          <p>{{ parent.mobile || 'Mobile N/A' }}</p>
-          <p>{{ parent.email || 'Email N/A' }}</p>
+    <!-- ── Hero ── -->
+    <div class="sp-hero">
+      <div class="sp-avatar">{{ (d.basicDetails.fullName[0] || 'S').toUpperCase() }}</div>
+      <div class="sp-hero-body">
+        <h2 class="sp-name">{{ d.basicDetails.fullName }}</h2>
+        <p class="sp-sub">{{ d.courseDetails.courseName }}</p>
+        <div class="sp-tags">
+          <span class="sp-tag" *ngIf="d.basicDetails.usn">{{ d.basicDetails.usn }}</span>
+          <span class="sp-tag" *ngIf="d.courseDetails.srNumber">SR: {{ d.courseDetails.srNumber }}</span>
+          <span class="sp-tag" *ngIf="d.courseDetails.semester">{{ d.courseDetails.semester }}</span>
         </div>
       </div>
-    </section>
+    </div>
 
-    <section class="student-card" *ngIf="data.addresses?.length">
-      <div class="section-head">
+    <!-- ── Personal Information ── -->
+    <div class="sp-card">
+      <div class="sp-card-header">
+        <ion-icon name="person-circle-outline"></ion-icon>
+        <h3>Personal Information</h3>
+      </div>
+      <div class="sp-grid">
+        <div class="sp-row">
+          <span class="sp-label">Date of Birth</span>
+          <span class="sp-value">{{ d.basicDetails.dob | date:'dd MMM yyyy' }}</span>
+        </div>
+        <div class="sp-row">
+          <span class="sp-label">Gender</span>
+          <span class="sp-value">{{ d.basicDetails.gender || '—' }}</span>
+        </div>
+        <div class="sp-row">
+          <span class="sp-label">Blood Group</span>
+          <span class="sp-value sp-chip sp-chip--red">{{ d.basicDetails.bloodGroup || '—' }}</span>
+        </div>
+        <div class="sp-row">
+          <span class="sp-label">Nationality</span>
+          <span class="sp-value">{{ d.basicDetails.nationality || '—' }}</span>
+        </div>
+        <div class="sp-row">
+          <span class="sp-label">Religion</span>
+          <span class="sp-value">{{ d.basicDetails.religion || '—' }}</span>
+        </div>
+        <div class="sp-row">
+          <span class="sp-label">Caste</span>
+          <span class="sp-value">{{ d.basicDetails.caste || '—' }}</span>
+        </div>
+        <div class="sp-row">
+          <span class="sp-label">Category</span>
+          <span class="sp-value">{{ d.basicDetails.category || '—' }}</span>
+        </div>
+        <div class="sp-row">
+          <span class="sp-label">Mother Tongue</span>
+          <span class="sp-value">{{ d.basicDetails.motherTongue || '—' }}</span>
+        </div>
+        <div class="sp-row">
+          <span class="sp-label">Birth Place</span>
+          <span class="sp-value">{{ d.basicDetails.birthPlace || '—' }}</span>
+        </div>
+        <div class="sp-row">
+          <span class="sp-label">Disability</span>
+          <span class="sp-value">{{ d.basicDetails.disability || '—' }}</span>
+        </div>
+        <div class="sp-row">
+          <span class="sp-label">Annual Income</span>
+          <span class="sp-value">₹ {{ d.basicDetails.annualIncome | number }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Contact ── -->
+    <div class="sp-card">
+      <div class="sp-card-header">
+        <ion-icon name="call-outline"></ion-icon>
+        <h3>Contact</h3>
+      </div>
+      <div class="sp-grid">
+        <div class="sp-row">
+          <span class="sp-label">Phone</span>
+          <a class="sp-value sp-link" [href]="'tel:' + d.basicDetails.phone">
+            {{ d.basicDetails.phone || '—' }}
+          </a>
+        </div>
+        <div class="sp-row">
+          <span class="sp-label">Email</span>
+          <a class="sp-value sp-link" [href]="'mailto:' + d.basicDetails.email">
+            {{ d.basicDetails.email || '—' }}
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ID Proof ── -->
+    <div class="sp-card">
+      <div class="sp-card-header">
+        <ion-icon name="id-card-outline"></ion-icon>
+        <h3>Identity</h3>
+      </div>
+      <div class="sp-grid">
+        <div class="sp-row">
+          <span class="sp-label">ID Type</span>
+          <span class="sp-value">{{ d.basicDetails.idType || '—' }}</span>
+        </div>
+        <div class="sp-row">
+          <span class="sp-label">ID Number</span>
+          <span class="sp-value sp-mono">{{ d.basicDetails.idNumber || '—' }}</span>
+        </div>
+        <div class="sp-row" *ngIf="d.basicDetails.antiRaggingId">
+          <span class="sp-label">Anti-Ragging ID</span>
+          <span class="sp-value sp-mono">{{ d.basicDetails.antiRaggingId }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Parents ── -->
+    <div class="sp-card" *ngIf="d.parents?.length">
+      <div class="sp-card-header">
+        <ion-icon name="people-outline"></ion-icon>
+        <h3>Parents / Guardians</h3>
+      </div>
+      <div class="sp-parent-list">
+        <div class="sp-parent" *ngFor="let p of d.parents; trackBy: trackByIndex">
+          <div class="sp-parent-badge">{{ p.type[0] }}</div>
+          <div class="sp-parent-info">
+            <strong>{{ p.name || '—' }}</strong>
+            <span>{{ p.type }}</span>
+            <span *ngIf="p.occupation">{{ p.occupation }}</span>
+            <a class="sp-link" [href]="'tel:' + p.mobile" *ngIf="p.mobile">
+              <ion-icon name="call-outline"></ion-icon> {{ p.mobile }}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Addresses ── -->
+    <div class="sp-card" *ngIf="d.addresses?.length">
+      <div class="sp-card-header">
+        <ion-icon name="location-outline"></ion-icon>
         <h3>Addresses</h3>
       </div>
-      <div class="stack-list">
-        <div class="stack-card" *ngFor="let address of data.addresses; trackBy: trackByIndex">
-          <div class="stack-top">
-            <strong>{{ address.type }}</strong>
-            <span>PIN {{ address.pin || 'N/A' }}</span>
-          </div>
-          <h4>{{ address.address1 || 'Address line 1 N/A' }}</h4>
-          <p>{{ address.address2 || 'Address line 2 N/A' }}</p>
-          <p>State ID {{ address.state || 'N/A' }}</p>
+      <div class="sp-addr-list">
+        <div class="sp-addr" *ngFor="let a of d.addresses; trackBy: trackByIndex">
+          <div class="sp-addr-type">{{ a.type }}</div>
+          <p class="sp-addr-line">{{ a.address1 }}<span *ngIf="a.address2">, {{ a.address2 }}</span></p>
+          <p class="sp-addr-pin">PIN {{ a.pin }}</p>
         </div>
       </div>
-    </section>
+    </div>
+
   </ng-container>
 </ion-content>

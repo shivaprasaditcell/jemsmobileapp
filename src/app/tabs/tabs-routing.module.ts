@@ -72,6 +72,34 @@ const routes: Routes = [
         loadChildren: () => import('../pages/digital-content/digital-content.module').then(m => m.DigitalContentPageModule)
       },
       {
+        path: 'student-personal-info',
+        loadChildren: () => import('../pages/student-personal-info/student-personal-info.module').then(m => m.StudentPersonalInfoPageModule)
+      },
+      {
+        path: 'student-enrollment',
+        loadChildren: () => import('../pages/student-enrollment/student-enrollment.module').then(m => m.StudentEnrollmentPageModule)
+      },
+      {
+        path: 'student-fees',
+        loadChildren: () => import('../pages/student-fees/student-fees.module').then(m => m.StudentFeesPageModule)
+      },
+      {
+        path: 'student-documents',
+        loadChildren: () => import('../pages/student-documents/student-documents.module').then(m => m.StudentDocumentsPageModule)
+      },
+      {
+        path: 'student-attendance',
+        loadChildren: () => import('../pages/student-attendance/student-attendance.module').then(m => m.StudentAttendancePageModule)
+      },
+      {
+        path: 'student-timetable',
+        loadChildren: () => import('../pages/student-timetable/student-timetable.module').then(m => m.StudentTimetablePageModule)
+      },
+      {
+        path: 'student-quiz/:sessionId',
+        loadChildren: () => import('../pages/student-quiz/student-quiz.module').then(m => m.StudentQuizPageModule)
+      },
+      {
         path: '',
         redirectTo: 'home',
         pathMatch: 'full'

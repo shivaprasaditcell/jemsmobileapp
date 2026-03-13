@@ -2,11 +2,24 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastController } from '@ionic/angular';
+import { catchError, of } from 'rxjs';
 import { filter, take } from 'rxjs/operators';
 import { AuthService } from '../../core/services/auth.service';
 import { AttendanceSectionResponse, AttendanceEntry } from '../../models/attendance.model';
-import { ContentTree, ContentNode } from '../../models/content-tree.model';
+import { ContentTree, ContentNode, ContentAttachment } from '../../models/content-tree.model';
 import { environment } from 'src/environments/environment';
+
+interface MappedQuestion {
+  qid: number;
+  questiontext: string;
+  questionmarks: number;
+  questiontype: string;       // 'mcq' | 'descriptive'
+  answer?: string;            // correct option label for MCQ e.g. 'B'
+  knowledgename?: string;
+  difficultyname?: string;
+  bloomname?: string;
+  options?: { optionid: number; optionlabel: string; optiontext: string }[];
+}
 
 @Component({
   selector: 'app-attendance',
@@ -17,6 +30,7 @@ import { environment } from 'src/environments/environment';
 export class AttendancePage implements OnInit {
   loading = true;
   saving = false;
+  activeTab: 'attendance' | 'details' = 'attendance';
 
   courseName = '';
   vsectionName = '';
@@ -40,6 +54,10 @@ export class AttendancePage implements OnInit {
   selectedUnit: ContentNode | null = null;
   selectedChapter: ContentNode | null = null;
   selectedTopic: ContentNode | null = null;
+
+  // Mapped questions for selected topic
+  mappedQuestions: MappedQuestion[] = [];
+  questionsLoading = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -163,11 +181,44 @@ export class AttendancePage implements OnInit {
 
   onTopicChange(topicId: number) {
     this.selectedTopic = this.topics.find(t => t.nodeId === +topicId) || null;
+    this.loadMappedQuestions();
+  }
+
+  private loadMappedQuestions() {
+    this.mappedQuestions = [];
+    if (!this.selectedTopic) return;
+    this.questionsLoading = true;
+    this.http.get<MappedQuestion[]>(
+      `${environment.apiUrl}QuestionBank/topic/${this.selectedTopic.nodeId}`
+    ).pipe(catchError(() => of([]))).subscribe(data => {
+      this.mappedQuestions = Array.isArray(data) ? data : [];
+      this.questionsLoading = false;
+    });
+  }
+
+  get mcqQuestions(): MappedQuestion[] {
+    return this.mappedQuestions.filter(q => q.questiontype?.toLowerCase() === 'mcq');
+  }
+
+  get descriptiveQuestions(): MappedQuestion[] {
+    return this.mappedQuestions.filter(q => q.questiontype?.toLowerCase() !== 'mcq');
   }
 
   get topicLabel(): string {
     if (!this.selectedTopic) return '';
     return this.selectedTopic.nodeTitle;
+  }
+
+  hasDescription(node: ContentNode | null): boolean {
+    if (!node?.nodeDescription) return false;
+    return node.nodeDescription.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, '').trim().length > 0;
+  }
+
+  fileSizeLabel(bytes: number | undefined): string {
+    if (!bytes) return '';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1048576).toFixed(1) + ' MB';
   }
 
   // ── Save ──────────────────────────────────────────────────────────────────

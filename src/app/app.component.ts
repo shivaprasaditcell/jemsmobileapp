@@ -29,6 +29,20 @@ export class AppComponent implements OnInit {
   quickAccessOpen = false;
   quickAccessSearch = '';
 
+  private readonly studentRouteMeta: QuickAccessCard[] = [
+    { title: 'Home', subtitle: 'General', route: '/tabs/home', icon: 'home-outline', accent: '#de5b4b', tint: 'rgba(222, 91, 75, 0.14)' },
+    { title: 'Timetable', subtitle: 'Academic', route: '/tabs/student-timetable', icon: 'calendar-outline', accent: '#3f7ccf', tint: 'rgba(63, 124, 207, 0.14)' },
+    { title: 'Personal Details', subtitle: 'Profile', route: '/tabs/student-personal-info', icon: 'person-outline', accent: '#125875', tint: 'rgba(18, 88, 117, 0.14)' },
+    { title: 'Academic', subtitle: 'Enrollment', route: '/tabs/student-enrollment', icon: 'school-outline', accent: '#3f7ccf', tint: 'rgba(63, 124, 207, 0.14)' },
+    { title: 'Attendance', subtitle: 'Academic', route: '/tabs/student-attendance', icon: 'checkmark-circle-outline', accent: '#4d9c58', tint: 'rgba(77, 156, 88, 0.14)' },
+    { title: 'Fee', subtitle: 'Finance', route: '/tabs/student-fees', icon: 'card-outline', accent: '#ed7a1c', tint: 'rgba(237, 122, 28, 0.14)' },
+    { title: 'Documents', subtitle: 'Records', route: '/tabs/student-documents', icon: 'document-text-outline', accent: '#6a70ca', tint: 'rgba(106, 112, 202, 0.14)' },
+    { title: 'Mentor', subtitle: 'Academic', route: '/tabs/mentoring-sessions', icon: 'people-circle-outline', accent: '#8d52c1', tint: 'rgba(141, 82, 193, 0.14)' },
+    { title: 'Department Details', subtitle: 'Directory', route: '/tabs/dept-master', icon: 'business-outline', accent: '#1d9eaf', tint: 'rgba(29, 158, 175, 0.14)' },
+    { title: 'Events', subtitle: 'General', route: '/tabs/events', icon: 'megaphone-outline', accent: '#1e9db5', tint: 'rgba(30, 157, 181, 0.14)' },
+    { title: 'Change Password', subtitle: 'General', route: '/tabs/change-password', icon: 'lock-closed-outline', accent: '#d05454', tint: 'rgba(208, 84, 84, 0.14)' }
+  ];
+
   private readonly routeMeta: QuickAccessCard[] = [
     { title: 'Home', subtitle: 'General', route: '/tabs/home', icon: 'home-outline', accent: '#de5b4b', tint: 'rgba(222, 91, 75, 0.14)' },
     { title: 'Timetable', subtitle: 'Academic', route: '/tabs/timetable', icon: 'calendar-outline', accent: '#3f7ccf', tint: 'rgba(63, 124, 207, 0.14)' },
@@ -98,6 +112,10 @@ export class AppComponent implements OnInit {
     this.imgError = true;
   }
 
+  get isStudentUser(): boolean {
+    return this.authService.isStudent();
+  }
+
   get filteredQuickAccessCards(): QuickAccessCard[] {
     const query = this.quickAccessSearch.trim().toLowerCase();
     if (!query) return this.quickAccessCards;
@@ -109,6 +127,10 @@ export class AppComponent implements OnInit {
   }
 
   get quickAccessCards(): QuickAccessCard[] {
+    if (this.isStudentUser) {
+      return this.studentRouteMeta;
+    }
+
     const cards: QuickAccessCard[] = [];
     const seenRoutes = new Set<string>();
     const seenTitles = new Set<string>();

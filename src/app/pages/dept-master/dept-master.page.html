@@ -16,8 +16,8 @@
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
 
-  <!-- ── Department filter ─────────────────────────── -->
-  <div class="dept-select-wrap">
+  <!-- ── Department filter (hidden for students) ──── -->
+  <div class="dept-select-wrap" *ngIf="!isStudentUser">
     <ion-icon name="business-outline" class="dept-icon"></ion-icon>
     <ion-select class="dept-select" [(ngModel)]="selectedDept"
       interface="action-sheet" placeholder="All Departments">
@@ -29,7 +29,7 @@
   <!-- Count pill -->
   <p class="result-count" *ngIf="!loading">
     {{ filtered.length }} staff
-    <span *ngIf="selectedDept"> · {{ selectedDept }}</span>
+    <span *ngIf="selectedDept && !isStudentUser"> · {{ selectedDept }}</span>
   </p>
 
   <!-- ── Loading ──────────────────────────────────── -->
@@ -65,7 +65,7 @@
       <div class="staff-info">
         <p class="staff-name">{{ fullName(s) }}</p>
         <p class="staff-desig" *ngIf="s.designationName">{{ s.designationName }}</p>
-        <p class="staff-dept" *ngIf="s.departmentName">
+        <p class="staff-dept" *ngIf="s.departmentName && !isStudentUser">
           <ion-icon name="business-outline"></ion-icon>{{ s.departmentName }}
         </p>
         <div class="staff-tags" *ngIf="s.staffTypeName || s.usercategoryName">
@@ -129,7 +129,7 @@
           <div class="sr-info">
             <p class="sr-name">{{ fullName(s) }}</p>
             <p class="sr-sub">{{ s.designationName }}<span *ngIf="s.useremployeecode"> · {{ s.useremployeecode }}</span></p>
-            <p class="sr-dept" *ngIf="s.departmentName">{{ s.departmentName }}</p>
+            <p class="sr-dept" *ngIf="s.departmentName && !isStudentUser">{{ s.departmentName }}</p>
           </div>
           <ion-icon name="chevron-forward-outline" class="sr-arrow"></ion-icon>
         </div>
@@ -167,7 +167,7 @@
 
       <div class="detail-rows">
 
-        <div class="detail-row" *ngIf="selected.departmentName">
+        <div class="detail-row" *ngIf="selected.departmentName && !isStudentUser">
           <ion-icon name="business-outline"></ion-icon>
           <div class="detail-row-content">
             <span class="detail-row-label">Department</span>

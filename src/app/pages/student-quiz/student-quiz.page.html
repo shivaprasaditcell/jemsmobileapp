@@ -1,0 +1,217 @@
+<ion-header>
+  <ion-toolbar [color]="state === 'active' ? 'danger' : 'primary'">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()" *ngIf="state !== 'active'">
+        <ion-icon name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title *ngIf="state !== 'active'">Online Test</ion-title>
+
+    <!-- Active quiz toolbar -->
+    <ng-container *ngIf="state === 'active'">
+      <ion-title class="quiz-toolbar-title">
+        <span class="quiz-q-pos">Q {{ currentIndex + 1 }}/{{ questions.length }}</span>
+        <!-- Compact header ticker -->
+        <span class="quiz-header-timer" [class.danger]="timeLeftSec <= 60" [class.warning]="timeLeftSec > 60 && timeLeftSec <= 300">
+          <ion-icon name="timer-outline"></ion-icon>
+          {{ formattedTime }}
+        </span>
+      </ion-title>
+      <ion-buttons slot="end">
+        <ion-button (click)="showPalette = !showPalette">
+          <ion-icon name="grid-outline"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ng-container>
+  </ion-toolbar>
+
+  <!-- Progress bar while active -->
+  <div class="quiz-progress-bar" *ngIf="state === 'active'">
+    <div class="quiz-progress-fill"
+         [style.width.%]="(answeredCount / questions.length) * 100">
+    </div>
+    <span class="quiz-progress-label">{{ answeredCount }}/{{ questions.length }} answered</span>
+  </div>
+</ion-header>
+
+<ion-content>
+
+  <!-- ── Loading ── -->
+  <div class="qz-state" *ngIf="state === 'loading'">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+    <p>Loading quiz…</p>
+  </div>
+
+  <!-- ── Expired ── -->
+  <div class="qz-state" *ngIf="state === 'expired'">
+    <ion-icon name="timer-off-outline" class="qz-state-icon warn"></ion-icon>
+    <h2>Quiz Expired</h2>
+    <p>This quiz is no longer available.</p>
+    <ion-button expand="block" (click)="goBack()">Back to Timetable</ion-button>
+  </div>
+
+  <!-- ── Already submitted (no result) ── -->
+  <div class="qz-state" *ngIf="state === 'already_submitted'">
+    <ion-icon name="checkmark-circle-outline" class="qz-state-icon ok"></ion-icon>
+    <h2>Already Submitted</h2>
+    <p>You have already submitted this quiz.</p>
+    <ion-button expand="block" (click)="goBack()">Back to Timetable</ion-button>
+  </div>
+
+  <!-- ── Error ── -->
+  <div class="qz-state" *ngIf="state === 'error'">
+    <ion-icon name="alert-circle-outline" class="qz-state-icon warn"></ion-icon>
+    <h2>Error</h2>
+    <p>{{ errorMsg }}</p>
+    <ion-button expand="block" (click)="goBack()">Back to Timetable</ion-button>
+  </div>
+
+  <!-- ── Result ── -->
+  <div class="qz-result" *ngIf="state === 'submitted' && result">
+    <div class="qz-result-hero">
+      <ion-icon name="trophy-outline"></ion-icon>
+      <h1>Submitted!</h1>
+    </div>
+
+    <div class="qz-scorecard">
+      <div class="qz-score-circle" [style.borderColor]="resultColor(result.percentage)">
+        <span class="qz-pct" [style.color]="resultColor(result.percentage)">{{ result.percentage }}%</span>
+        <span class="qz-pct-lbl">Score</span>
+      </div>
+      <div class="qz-score-details">
+        <div class="qz-score-row">
+          <span>Correct</span>
+          <strong>{{ result.correctCount }} / {{ result.totalQuestions }}</strong>
+        </div>
+        <div class="qz-score-row">
+          <span>Marks</span>
+          <strong>{{ result.marksObtained }} / {{ result.totalMarks }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Per-question review -->
+    <div class="qz-review" *ngIf="result.questions?.length">
+      <h3 class="qz-review-title">Review</h3>
+      <div *ngFor="let q of result.questions; let i = index"
+           class="qz-review-card"
+           [class.correct]="q.isCorrect"
+           [class.wrong]="!q.isCorrect && q.selectedOption">
+
+        <div class="qz-review-qnum">
+          <ion-icon [name]="q.isCorrect ? 'checkmark-circle' : (q.selectedOption ? 'close-circle' : 'remove-circle')"
+                    [color]="q.isCorrect ? 'success' : (q.selectedOption ? 'danger' : 'medium')">
+          </ion-icon>
+          Q{{ i + 1 }}
+        </div>
+
+        <div class="qz-review-text" [innerHTML]="q.questiontext"></div>
+
+        <div class="qz-review-opts">
+          <div *ngFor="let opt of q.options"
+               class="qz-review-opt"
+               [class.correct-opt]="opt.optionlabel === q.correctAnswer"
+               [class.wrong-opt]="opt.optionlabel === q.selectedOption && !q.isCorrect">
+            <strong>{{ opt.optionlabel }}.</strong> {{ opt.optiontext }}
+          </div>
+        </div>
+
+        <div class="qz-not-answered" *ngIf="!q.selectedOption">Not answered</div>
+      </div>
+    </div>
+
+    <ion-button expand="block" class="qz-back-btn" (click)="goBack()">
+      <ion-icon name="arrow-back" slot="start"></ion-icon>
+      Back to Timetable
+    </ion-button>
+  </div>
+
+  <!-- ── Active Quiz ── -->
+  <div class="qz-active" *ngIf="state === 'active'">
+
+    <!-- ── Timer Arc ── -->
+    <div class="qz-arc-wrap">
+      <svg width="100" height="100" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="44"
+                fill="none" stroke="#e5e7eb" stroke-width="7"/>
+        <circle cx="50" cy="50" r="44"
+                fill="none"
+                [attr.stroke]="arcColor"
+                stroke-width="7"
+                stroke-linecap="round"
+                stroke-dasharray="276.46"
+                [attr.stroke-dashoffset]="ARC_CIRC - arcDash"
+                transform="rotate(-90 50 50)"
+                class="qz-arc"/>
+      </svg>
+      <div class="qz-arc-center">
+        <span class="qz-arc-time" [style.color]="arcColor">{{ formattedTime }}</span>
+        <span class="qz-arc-lbl">left</span>
+      </div>
+    </div>
+
+    <!-- Question card -->
+    <div class="qz-card" *ngIf="currentQ as q">
+      <div class="qz-card-meta">
+        <span class="qz-card-marks">{{ q.questionmarks }} Mark{{ q.questionmarks !== 1 ? 's' : '' }}</span>
+        <span *ngIf="q.selected" class="qz-answered-chip">
+          <ion-icon name="checkmark"></ion-icon> Selected: {{ q.selected }}
+        </span>
+      </div>
+      <div class="qz-card-text" [innerHTML]="stripHtml(q.questiontext)"></div>
+
+      <!-- Options -->
+      <div class="qz-options">
+        <button *ngFor="let opt of q.options"
+                class="qz-opt-btn"
+                [class.selected]="q.selected === opt.optionlabel"
+                (click)="select(opt.optionlabel)">
+          <span class="qz-opt-label">{{ opt.optionlabel }}</span>
+          <span class="qz-opt-text">{{ opt.optiontext }}</span>
+          <ion-icon *ngIf="q.selected === opt.optionlabel" name="checkmark-circle" class="qz-check"></ion-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="qz-nav">
+      <ion-button fill="outline" [disabled]="currentIndex === 0" (click)="navigate(-1)">
+        <ion-icon name="chevron-back" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button fill="solid" color="success" (click)="confirmSubmit()">
+        <ion-icon name="send" slot="start"></ion-icon>
+        Submit
+      </ion-button>
+      <ion-button fill="outline" [disabled]="currentIndex === questions.length - 1" (click)="navigate(1)">
+        <ion-icon name="chevron-forward" slot="icon-only"></ion-icon>
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- ── Question Palette (slide-up panel) ── -->
+  <div class="qz-palette-overlay" *ngIf="showPalette && state === 'active'" (click)="showPalette = false">
+    <div class="qz-palette-sheet" (click)="$event.stopPropagation()">
+      <div class="qz-palette-header">
+        <span>Questions ({{ answeredCount }}/{{ questions.length }} answered)</span>
+        <ion-button fill="clear" (click)="showPalette = false">
+          <ion-icon name="close" slot="icon-only"></ion-icon>
+        </ion-button>
+      </div>
+      <div class="qz-palette-grid">
+        <button *ngFor="let q of questions; let i = index"
+                class="qz-pal-btn"
+                [class.answered]="q.selected !== null"
+                [class.current]="i === currentIndex"
+                (click)="jumpTo(i)">
+          {{ i + 1 }}
+        </button>
+      </div>
+      <div class="qz-palette-legend">
+        <span class="qz-leg answered">Answered</span>
+        <span class="qz-leg">Not answered</span>
+        <span class="qz-leg current">Current</span>
+      </div>
+    </div>
+  </div>
+
+</ion-content>
