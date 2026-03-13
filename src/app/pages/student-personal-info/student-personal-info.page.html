@@ -1,0 +1,86 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons>
+    <ion-title>Personal Info</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="student-page-content ion-padding">
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="student-empty" *ngIf="!loading && error">
+    <ion-icon name="cloud-offline-outline"></ion-icon>
+    <h3>Unable to load profile</h3>
+    <p>{{ error }}</p>
+  </div>
+
+  <div class="student-skeleton" *ngIf="loading">
+    <ion-skeleton-text animated style="width:100%;height:140px;border-radius:24px"></ion-skeleton-text>
+    <ion-skeleton-text animated style="width:100%;height:220px;border-radius:24px;margin-top:16px"></ion-skeleton-text>
+  </div>
+
+  <ng-container *ngIf="!loading && profile as data">
+    <section class="student-card student-hero-card">
+      <p class="eyebrow">Student</p>
+      <h2>{{ data.basicDetails.fullName }}</h2>
+      <p>{{ data.courseDetails.courseName }}</p>
+      <div class="hero-tags">
+        <span>{{ data.basicDetails.usn || 'USN N/A' }}</span>
+        <span>{{ data.courseDetails.srNumber || 'SR N/A' }}</span>
+        <span>{{ data.courseDetails.semester || 'Semester N/A' }}</span>
+      </div>
+    </section>
+
+    <section class="student-card">
+      <div class="section-head">
+        <h3>Basic Details</h3>
+      </div>
+      <div class="info-grid">
+        <div class="info-item"><span>Date of Birth</span><strong>{{ data.basicDetails.dob | date:'dd MMM yyyy' }}</strong></div>
+        <div class="info-item"><span>Gender</span><strong>{{ data.basicDetails.gender || 'N/A' }}</strong></div>
+        <div class="info-item"><span>Phone</span><strong>{{ data.basicDetails.phone || 'N/A' }}</strong></div>
+        <div class="info-item"><span>Email</span><strong>{{ data.basicDetails.email || 'N/A' }}</strong></div>
+        <div class="info-item"><span>Nationality</span><strong>{{ data.basicDetails.nationality || 'N/A' }}</strong></div>
+        <div class="info-item"><span>Blood Group</span><strong>{{ data.basicDetails.bloodGroup || 'N/A' }}</strong></div>
+        <div class="info-item"><span>Category</span><strong>{{ data.basicDetails.category || 'N/A' }}</strong></div>
+        <div class="info-item"><span>Mother Tongue</span><strong>{{ data.basicDetails.motherTongue || 'N/A' }}</strong></div>
+      </div>
+    </section>
+
+    <section class="student-card" *ngIf="data.parents?.length">
+      <div class="section-head">
+        <h3>Parents</h3>
+      </div>
+      <div class="stack-list">
+        <div class="stack-card" *ngFor="let parent of data.parents; trackBy: trackByIndex">
+          <div class="stack-top">
+            <strong>{{ parent.type }}</strong>
+            <span>{{ parent.occupation || 'Occupation N/A' }}</span>
+          </div>
+          <h4>{{ parent.name }}</h4>
+          <p>{{ parent.mobile || 'Mobile N/A' }}</p>
+          <p>{{ parent.email || 'Email N/A' }}</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="student-card" *ngIf="data.addresses?.length">
+      <div class="section-head">
+        <h3>Addresses</h3>
+      </div>
+      <div class="stack-list">
+        <div class="stack-card" *ngFor="let address of data.addresses; trackBy: trackByIndex">
+          <div class="stack-top">
+            <strong>{{ address.type }}</strong>
+            <span>PIN {{ address.pin || 'N/A' }}</span>
+          </div>
+          <h4>{{ address.address1 || 'Address line 1 N/A' }}</h4>
+          <p>{{ address.address2 || 'Address line 2 N/A' }}</p>
+          <p>State ID {{ address.state || 'N/A' }}</p>
+        </div>
+      </div>
+    </section>
+  </ng-container>
+</ion-content>

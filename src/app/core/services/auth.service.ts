@@ -80,8 +80,9 @@ export class AuthService {
 
   studentLogin(username: string, password: string): Observable<any> {
     return this.http.post<any>(`${environment.apiUrl}StudentPortal/login`, {
-      username,
-      password
+      srNumber: username,
+      password,
+      rememberMe: true
     }).pipe(
       tap(res => {
         if (res) {

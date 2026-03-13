@@ -400,7 +400,10 @@ $accent:  #F26622;
   --background-activated: #0d4358;
   --background-hover: #176784;
   --color: #ffffff;
-  --box-shadow: 0 12px 24px rgba(18, 88, 117, 0.28);
+  --box-shadow: 0 8px 16px rgba(18, 88, 117, 0.25);
+  width: 40px;
+  height: 40px;
+  --ion-icon-font-size: 18px;
   margin: 0;
 }
 

@@ -1,0 +1,42 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons>
+    <ion-title>Enrollment</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="student-page-content ion-padding">
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="student-empty" *ngIf="!loading && error">
+    <ion-icon name="cloud-offline-outline"></ion-icon>
+    <h3>Unable to load enrollment</h3>
+    <p>{{ error }}</p>
+  </div>
+
+  <div class="student-skeleton" *ngIf="loading">
+    <ion-skeleton-text animated style="width:100%;height:180px;border-radius:24px"></ion-skeleton-text>
+  </div>
+
+  <section class="student-card" *ngIf="!loading && profile as data">
+    <div class="section-head">
+      <h3>{{ data.courseDetails.courseName }}</h3>
+      <span>{{ data.courseDetails.batch }}</span>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-item"><span>College</span><strong>{{ data.courseDetails.collegeName || 'N/A' }}</strong></div>
+      <div class="info-item"><span>Specialization</span><strong>{{ data.courseDetails.specialization || 'N/A' }}</strong></div>
+      <div class="info-item"><span>Session</span><strong>{{ data.courseDetails.session || 'N/A' }}</strong></div>
+      <div class="info-item"><span>Semester</span><strong>{{ data.courseDetails.semester || 'N/A' }}</strong></div>
+      <div class="info-item"><span>Section</span><strong>{{ data.courseDetails.sectionName || 'N/A' }}</strong></div>
+      <div class="info-item"><span>Admission Mode</span><strong>{{ data.courseDetails.admissionMode || 'N/A' }}</strong></div>
+      <div class="info-item"><span>Admission Year</span><strong>{{ data.courseDetails.admissionYear || 'N/A' }}</strong></div>
+      <div class="info-item"><span>Date of Admission</span><strong>{{ data.courseDetails.dateOfAdmission | date:'dd MMM yyyy' }}</strong></div>
+      <div class="info-item"><span>Regular / Lateral</span><strong>{{ data.courseDetails.regularLateral === 1 ? 'Regular' : 'Lateral Entry' }}</strong></div>
+      <div class="info-item"><span>SR Number</span><strong>{{ data.courseDetails.srNumber || 'N/A' }}</strong></div>
+    </div>
+  </section>
+</ion-content>

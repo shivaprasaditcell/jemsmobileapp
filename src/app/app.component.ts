@@ -50,8 +50,8 @@ export class AppComponent implements OnInit {
   dismissMode = false;
   overDropZone = false;
 
-  private readonly fabSize = 56;
-  private readonly fabMargin = 16;
+  private readonly fabSize = 40;
+  private readonly fabMargin = 12;
   private readonly LONG_PRESS_MS = 600;
   private readonly DROP_ZONE_THRESHOLD = 110;
   private pointerId: number | null = null;
@@ -303,7 +303,7 @@ export class AppComponent implements OnInit {
 
   private setDefaultFabPosition() {
     this.fabX = this.clampX(window.innerWidth - this.fabSize - this.fabMargin);
-    this.fabY = this.clampY(window.innerHeight - this.fabSize - 92);
+    this.fabY = this.clampY(window.innerHeight - this.fabSize - 62);
     this.fabPositionInitialized = true;
   }
 

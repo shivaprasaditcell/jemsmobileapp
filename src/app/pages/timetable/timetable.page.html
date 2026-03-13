@@ -74,9 +74,14 @@
           <div class="slot-body">
             <div class="slot-top-row">
               <span class="activity-pill" [class]="activityColor(slot.activitytype)">{{ slot.activitytype }}</span>
-              <span class="slot-room">
-                <ion-icon name="location-outline"></ion-icon>{{ slot.roomnumber }}
-              </span>
+              <div class="slot-room-section">
+                <span class="slot-room">
+                  <ion-icon name="location-outline"></ion-icon>{{ slot.roomnumber }}
+                </span>
+                <span class="slot-vsection" *ngIf="slot.virtualSectionName">
+                  <ion-icon name="people-outline"></ion-icon>{{ slot.virtualSectionName }}
+                </span>
+              </div>
             </div>
             <h4 class="slot-course">{{ slot.courseName }}</h4>
             <p class="slot-code">{{ slot.courseCode }}</p>

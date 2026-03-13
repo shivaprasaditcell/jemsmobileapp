@@ -20,6 +20,7 @@ export interface TimetableSlot {
   courseCode: string;
   activitytype: string;
   roomnumber: string;
+  virtualSectionName?: string;
   isShared: boolean;
   sharedWith: any[];
   subjectslnum?: number;

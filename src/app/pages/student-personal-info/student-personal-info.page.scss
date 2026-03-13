@@ -1,0 +1,143 @@
+.student-page-content {
+  --background: #f4f8fb;
+}
+
+.student-card,
+.student-empty {
+  background: #fff;
+  border-radius: 24px;
+  padding: 18px;
+  box-shadow: 0 10px 28px rgba(18, 88, 117, 0.1);
+  border: 1px solid rgba(18, 88, 117, 0.08);
+  margin-bottom: 16px;
+}
+
+.student-hero-card {
+  background: linear-gradient(145deg, #125875 0%, #0d7082 100%);
+  color: #fff;
+
+  h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 800;
+  }
+
+  p {
+    margin: 6px 0 0;
+    color: rgba(255, 255, 255, 0.84);
+  }
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.hero-tags,
+.info-grid,
+.stack-list {
+  display: grid;
+  gap: 12px;
+}
+
+.hero-tags {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 14px;
+
+  span {
+    padding: 8px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+  }
+}
+
+.section-head {
+  margin-bottom: 12px;
+
+  h3 {
+    margin: 0;
+    color: #17313d;
+    font-size: 16px;
+  }
+}
+
+.info-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.info-item,
+.stack-card {
+  background: #f6f9fb;
+  border-radius: 18px;
+  padding: 14px;
+}
+
+.info-item {
+  span {
+    display: block;
+    font-size: 11px;
+    color: #6f838b;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  strong {
+    display: block;
+    margin-top: 6px;
+    color: #17313d;
+    line-height: 1.5;
+  }
+}
+
+.stack-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+
+  strong,
+  span {
+    font-size: 12px;
+  }
+
+  span {
+    color: #6f838b;
+  }
+}
+
+.stack-card {
+  h4 {
+    margin: 0;
+    color: #17313d;
+    font-size: 14px;
+  }
+
+  p {
+    margin: 6px 0 0;
+    color: #5d7580;
+    font-size: 13px;
+  }
+}
+
+.student-empty {
+  text-align: center;
+
+  ion-icon {
+    font-size: 34px;
+    color: #f26622;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-tags,
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+}
