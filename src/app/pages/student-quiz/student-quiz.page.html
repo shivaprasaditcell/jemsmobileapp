@@ -73,7 +73,8 @@
       <h1>Submitted!</h1>
     </div>
 
-    <div class="qz-scorecard">
+    <!-- MCQ scorecard -->
+    <div class="qz-scorecard" *ngIf="result.questionType !== 'descriptive'">
       <div class="qz-score-circle" [style.borderColor]="resultColor(result.percentage)">
         <span class="qz-pct" [style.color]="resultColor(result.percentage)">{{ result.percentage }}%</span>
         <span class="qz-pct-lbl">Score</span>
@@ -90,24 +91,38 @@
       </div>
     </div>
 
+    <!-- Descriptive: pending evaluation notice -->
+    <div class="qz-desc-eval-notice" *ngIf="result.questionType === 'descriptive'">
+      <ion-icon name="time-outline"></ion-icon>
+      <div class="qz-desc-eval-text">
+        <h3>Pending Evaluation</h3>
+        <p>Your answers have been submitted. Marks will be updated after faculty review.</p>
+      </div>
+    </div>
+
     <!-- Per-question review -->
     <div class="qz-review" *ngIf="result.questions?.length">
       <h3 class="qz-review-title">Review</h3>
       <div *ngFor="let q of result.questions; let i = index"
            class="qz-review-card"
            [class.correct]="q.isCorrect"
-           [class.wrong]="!q.isCorrect && q.selectedOption">
+           [class.wrong]="!q.isCorrect && q.selectedOption && result.questionType !== 'descriptive'">
 
         <div class="qz-review-qnum">
-          <ion-icon [name]="q.isCorrect ? 'checkmark-circle' : (q.selectedOption ? 'close-circle' : 'remove-circle')"
-                    [color]="q.isCorrect ? 'success' : (q.selectedOption ? 'danger' : 'medium')">
+          <ion-icon [name]="result.questionType === 'descriptive'
+                      ? (q.answerText || q.answerFilePath ? 'document-text' : 'remove-circle')
+                      : (q.isCorrect ? 'checkmark-circle' : (q.selectedOption ? 'close-circle' : 'remove-circle'))"
+                    [color]="result.questionType === 'descriptive'
+                      ? (q.answerText || q.answerFilePath ? 'primary' : 'medium')
+                      : (q.isCorrect ? 'success' : (q.selectedOption ? 'danger' : 'medium'))">
           </ion-icon>
           Q{{ i + 1 }}
         </div>
 
         <div class="qz-review-text" [innerHTML]="q.questiontext"></div>
 
-        <div class="qz-review-opts">
+        <!-- MCQ options review -->
+        <div class="qz-review-opts" *ngIf="result.questionType !== 'descriptive'">
           <div *ngFor="let opt of q.options"
                class="qz-review-opt"
                [class.correct-opt]="opt.optionlabel === q.correctAnswer"
@@ -116,7 +131,17 @@
           </div>
         </div>
 
-        <div class="qz-not-answered" *ngIf="!q.selectedOption">Not answered</div>
+        <!-- Descriptive: show submitted text -->
+        <div *ngIf="result.questionType === 'descriptive'">
+          <div class="qz-review-answer-text" *ngIf="q.answerText">{{ q.answerText }}</div>
+          <div class="qz-pdf-done" *ngIf="q.answerFilePath" style="margin-top:8px">
+            <ion-icon name="document-attach"></ion-icon>
+            <span>PDF answer submitted</span>
+          </div>
+          <div class="qz-not-answered" *ngIf="!q.answerText && !q.answerFilePath">Not answered</div>
+        </div>
+
+        <div class="qz-not-answered" *ngIf="result.questionType !== 'descriptive' && !q.selectedOption">Not answered</div>
       </div>
     </div>
 
@@ -154,14 +179,15 @@
     <div class="qz-card" *ngIf="currentQ as q">
       <div class="qz-card-meta">
         <span class="qz-card-marks">{{ q.questionmarks }} Mark{{ q.questionmarks !== 1 ? 's' : '' }}</span>
-        <span *ngIf="q.selected" class="qz-answered-chip">
+        <span *ngIf="!isDescriptive && q.selected" class="qz-answered-chip">
           <ion-icon name="checkmark"></ion-icon> Selected: {{ q.selected }}
         </span>
+        <span *ngIf="isDescriptive" class="qz-desc-chip">Descriptive</span>
       </div>
       <div class="qz-card-text" [innerHTML]="stripHtml(q.questiontext)"></div>
 
-      <!-- Options -->
-      <div class="qz-options">
+      <!-- MCQ Options -->
+      <div class="qz-options" *ngIf="!isDescriptive">
         <button *ngFor="let opt of q.options"
                 class="qz-opt-btn"
                 [class.selected]="q.selected === opt.optionlabel"
@@ -170,6 +196,57 @@
           <span class="qz-opt-text">{{ opt.optiontext }}</span>
           <ion-icon *ngIf="q.selected === opt.optionlabel" name="checkmark-circle" class="qz-check"></ion-icon>
         </button>
+      </div>
+
+      <!-- Descriptive Answer -->
+      <div class="qz-desc-wrap" *ngIf="isDescriptive">
+        <!-- Textarea -->
+        <label class="qz-desc-label">Type your answer</label>
+        <textarea class="qz-desc-textarea"
+                  [(ngModel)]="q.answerText"
+                  placeholder="Write your answer here…"
+                  rows="5"></textarea>
+        <div class="qz-desc-charcount">{{ q.answerText.length }} characters</div>
+
+        <!-- PDF Upload section -->
+        <div class="qz-pdf-section">
+          <div class="qz-pdf-divider">
+            <span>OR upload handwritten answer (PDF)</span>
+          </div>
+
+          <!-- Idle -->
+          <label class="qz-pdf-btn" *ngIf="q.uploadState === 'idle'">
+            <ion-icon name="cloud-upload-outline"></ion-icon>
+            Choose PDF File
+            <input type="file" accept="application/pdf" hidden
+                   (change)="uploadAnswerPdf(currentIndex, $event)">
+          </label>
+
+          <!-- Error retry -->
+          <label class="qz-pdf-btn qz-pdf-btn-error" *ngIf="q.uploadState === 'error'">
+            <ion-icon name="refresh-outline"></ion-icon>
+            Upload Failed — Tap to Retry
+            <input type="file" accept="application/pdf" hidden
+                   (change)="uploadAnswerPdf(currentIndex, $event)">
+          </label>
+
+          <!-- Uploading -->
+          <div class="qz-pdf-uploading" *ngIf="q.uploadState === 'uploading'">
+            <ion-spinner name="crescent" style="width:20px;height:20px"></ion-spinner>
+            <span>Uploading PDF…</span>
+          </div>
+
+          <!-- Done -->
+          <div class="qz-pdf-done" *ngIf="q.uploadState === 'done'">
+            <ion-icon name="checkmark-circle"></ion-icon>
+            <span>PDF uploaded successfully</span>
+            <label class="qz-pdf-replace">
+              Replace
+              <input type="file" accept="application/pdf" hidden
+                     (change)="uploadAnswerPdf(currentIndex, $event)">
+            </label>
+          </div>
+        </div>
       </div>
     </div>
 

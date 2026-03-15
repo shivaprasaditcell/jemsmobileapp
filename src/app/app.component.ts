@@ -38,7 +38,7 @@ export class AppComponent implements OnInit {
     { title: 'Fee', subtitle: 'Finance', route: '/tabs/student-fees', icon: 'card-outline', accent: '#ed7a1c', tint: 'rgba(237, 122, 28, 0.14)' },
     { title: 'Documents', subtitle: 'Records', route: '/tabs/student-documents', icon: 'document-text-outline', accent: '#6a70ca', tint: 'rgba(106, 112, 202, 0.14)' },
     { title: 'Mentor', subtitle: 'Academic', route: '/tabs/mentoring-sessions', icon: 'people-circle-outline', accent: '#8d52c1', tint: 'rgba(141, 82, 193, 0.14)' },
-    { title: 'Department Details', subtitle: 'Directory', route: '/tabs/dept-master', icon: 'business-outline', accent: '#1d9eaf', tint: 'rgba(29, 158, 175, 0.14)' },
+    { title: 'Contacts', subtitle: 'Directory', route: '/tabs/contacts', icon: 'business-outline', accent: '#1d9eaf', tint: 'rgba(29, 158, 175, 0.14)' },
     { title: 'Events', subtitle: 'General', route: '/tabs/events', icon: 'megaphone-outline', accent: '#1e9db5', tint: 'rgba(30, 157, 181, 0.14)' },
     { title: 'Change Password', subtitle: 'General', route: '/tabs/change-password', icon: 'lock-closed-outline', accent: '#d05454', tint: 'rgba(208, 84, 84, 0.14)' }
   ];
@@ -47,7 +47,7 @@ export class AppComponent implements OnInit {
     { title: 'Home', subtitle: 'General', route: '/tabs/home', icon: 'home-outline', accent: '#de5b4b', tint: 'rgba(222, 91, 75, 0.14)' },
     { title: 'Timetable', subtitle: 'Academic', route: '/tabs/timetable', icon: 'calendar-outline', accent: '#3f7ccf', tint: 'rgba(63, 124, 207, 0.14)' },
     { title: 'Events', subtitle: 'General', route: '/tabs/events', icon: 'megaphone-outline', accent: '#1e9db5', tint: 'rgba(30, 157, 181, 0.14)' },
-    { title: 'Department Master', subtitle: 'Directory', route: '/tabs/dept-master', icon: 'business-outline', accent: '#6a70ca', tint: 'rgba(106, 112, 202, 0.14)' },
+    { title: 'Contacts', subtitle: 'Directory', route: '/tabs/contacts', icon: 'business-outline', accent: '#6a70ca', tint: 'rgba(106, 112, 202, 0.14)' },
     { title: 'HRMS', subtitle: 'General', route: '/tabs/hrms', icon: 'finger-print-outline', accent: '#ed7a1c', tint: 'rgba(237, 122, 28, 0.14)' },
     { title: 'My Tickets', subtitle: 'Support', route: '/tabs/helpdesk', icon: 'ticket-outline', accent: '#1d9eaf', tint: 'rgba(29, 158, 175, 0.14)' },
     { title: 'Workload', subtitle: 'Academic', route: '/tabs/workload', icon: 'bar-chart-outline', accent: '#8d52c1', tint: 'rgba(141, 82, 193, 0.14)' },

@@ -47,13 +47,12 @@ export class TimetablePage implements OnInit {
             .subscribe({
               next: weeks => {
                 this.weeks = weeks;
-                // 3. Default to current week
-                const today = new Date();
-                const cur = weeks.find(w => {
-                  const s = new Date(w.weekStartDate);
-                  const e = new Date(w.weekEndDate);
-                  return today >= s && today <= e;
-                }) || weeks[0];
+                // 3. Default to current week (compare date-only to avoid time-of-day mismatches)
+                const strip = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+                const todayT = strip(new Date());
+                const cur = weeks.find(w =>
+                  todayT >= strip(new Date(w.weekStartDate)) && todayT <= strip(new Date(w.weekEndDate))
+                ) || weeks[0];
                 this.selectedWeek = cur;
                 this.loadTimetable(cur.weekNumber);
               },

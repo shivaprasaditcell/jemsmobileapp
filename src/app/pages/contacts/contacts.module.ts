@@ -4,12 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { IonicModule } from '@ionic/angular';
 import { RouterModule, Routes } from '@angular/router';
-import { DeptMasterPage } from './dept-master.page';
+import { ContactsPage } from './contacts.page';
 
-const routes: Routes = [{ path: '', component: DeptMasterPage }];
+const routes: Routes = [{ path: '', component: ContactsPage }];
 
 @NgModule({
   imports: [CommonModule, FormsModule, HttpClientModule, IonicModule, RouterModule.forChild(routes)],
-  declarations: [DeptMasterPage]
+  declarations: [ContactsPage]
 })
-export class DeptMasterPageModule {}
+export class ContactsPageModule {}

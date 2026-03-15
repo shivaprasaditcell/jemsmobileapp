@@ -24,8 +24,8 @@ const routes: Routes = [
         loadChildren: () => import('../pages/events/events.module').then(m => m.EventsPageModule)
       },
       {
-        path: 'dept-master',
-        loadChildren: () => import('../pages/dept-master/dept-master.module').then(m => m.DeptMasterPageModule)
+        path: 'contacts',
+        loadChildren: () => import('../pages/contacts/contacts.module').then(m => m.ContactsPageModule)
       },
       {
         path: 'hrms',

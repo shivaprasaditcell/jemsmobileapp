@@ -13,7 +13,10 @@ interface QuizQuestion {
   questionmarks: number;
   questiontype: string;
   options: { optionlabel: string; optiontext: string }[];
-  selected: string | null;
+  selected: string | null;       // MCQ
+  answerText: string;            // Descriptive: typed
+  answerFilePath: string | null; // Descriptive: uploaded PDF path
+  uploadState: 'idle' | 'uploading' | 'done' | 'error';
 }
 
 type QuizState = 'loading' | 'active' | 'submitted' | 'expired' | 'already_submitted' | 'error';
@@ -42,6 +45,7 @@ export class StudentQuizPage implements OnInit, OnDestroy {
 
   result: any = null;
   showPalette = false;
+  questionType: 'mcq' | 'descriptive' = 'mcq';
 
   private signalRSub?: Subscription;
 
@@ -97,7 +101,14 @@ export class StudentQuizPage implements OnInit, OnDestroy {
           return;
         }
         this.sessionInfo = data;
-        this.questions = (data.questions || []).map((q: any) => ({ ...q, selected: null }));
+        this.questionType = data.questionType?.toLowerCase() === 'descriptive' ? 'descriptive' : 'mcq';
+        this.questions = (data.questions || []).map((q: any) => ({
+          ...q,
+          selected: null,
+          answerText: '',
+          answerFilePath: q.answerFilePath || null,
+          uploadState: q.answerFilePath ? 'done' : 'idle'
+        }));
         const expiresAt = new Date(data.expiresAt).getTime();
         this.timeLeftSec = Math.max(0, Math.floor((expiresAt - Date.now()) / 1000));
         this.totalDurationSec = (data.durationMinutes || 0) * 60 || this.timeLeftSec;
@@ -154,7 +165,16 @@ export class StudentQuizPage implements OnInit, OnDestroy {
     return 'light';
   }
 
-  get answeredCount(): number { return this.questions.filter(q => q.selected !== null).length; }
+  get isDescriptive(): boolean { return this.questionType === 'descriptive'; }
+
+  get answeredCount(): number {
+    return this.questions.filter(q =>
+      this.isDescriptive
+        ? (q.answerText.trim().length > 0 || q.uploadState === 'done')
+        : q.selected !== null
+    ).length;
+  }
+
   get currentQ(): QuizQuestion { return this.questions[this.currentIndex]; }
 
   select(option: string) {
@@ -172,11 +192,12 @@ export class StudentQuizPage implements OnInit, OnDestroy {
 
   async confirmSubmit() {
     const unanswered = this.questions.length - this.answeredCount;
+    const label = this.isDescriptive ? 'answers' : 'quiz';
     const alert = await this.alertCtrl.create({
-      header: 'Submit Quiz',
+      header: this.isDescriptive ? 'Submit Answers' : 'Submit Quiz',
       message: unanswered > 0
         ? `You have ${unanswered} unanswered question(s). Submit anyway?`
-        : `Submit your quiz? You answered all ${this.questions.length} questions.`,
+        : `Submit your ${label}? You answered all ${this.questions.length} questions.`,
       buttons: [
         { text: 'Cancel', role: 'cancel' },
         { text: 'Submit', handler: () => this.submitQuiz() }
@@ -187,7 +208,11 @@ export class StudentQuizPage implements OnInit, OnDestroy {
 
   submitQuiz(autoSubmit = false) {
     this.clearTimer();
-    const answers = this.questions.map(q => ({ questionId: q.qid, selectedOption: q.selected }));
+    const answers = this.questions.map(q => ({
+      questionId:     q.qid,
+      selectedOption: this.isDescriptive ? null : q.selected,
+      answerText:     this.isDescriptive ? q.answerText : null
+    }));
     this.http.post<any>(`${environment.apiUrl}quiz/${this.sessionId}/submit`, { studentSlnum: this.studentId, answers })
       .pipe(catchError(err => of({ __err: err })))
       .subscribe(res => {
@@ -221,6 +246,34 @@ export class StudentQuizPage implements OnInit, OnDestroy {
     if (pct >= 75) return '#4d9c58';
     if (pct >= 50) return '#ed7a1c';
     return '#eb445a';
+  }
+
+  uploadAnswerPdf(questionIndex: number, event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+    const file = input.files[0];
+    const q = this.questions[questionIndex];
+    if (!q || q.uploadState === 'uploading') return;
+
+    q.uploadState = 'uploading';
+    const form = new FormData();
+    form.append('file', file);
+    form.append('studentSlnum', String(this.studentId));
+    form.append('questionId', String(q.qid));
+
+    this.http.post<any>(`${environment.apiUrl}quiz/${this.sessionId}/answer-pdf`, form)
+      .pipe(catchError(err => of({ __err: err })))
+      .subscribe(res => {
+        input.value = '';
+        if (res?.__err) {
+          q.uploadState = 'error';
+          this.showToast('Upload failed. Please try again.', 'danger');
+          return;
+        }
+        q.answerFilePath = res.filePath;
+        q.uploadState   = 'done';
+        this.showToast('PDF uploaded successfully!', 'success');
+      });
   }
 
   goBack() { this.router.navigate(['/tabs/student-timetable']); }

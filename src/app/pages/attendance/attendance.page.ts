@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastController } from '@ionic/angular';
@@ -6,19 +6,24 @@ import { catchError, of } from 'rxjs';
 import { filter, take } from 'rxjs/operators';
 import { AuthService } from '../../core/services/auth.service';
 import { AttendanceSectionResponse, AttendanceEntry } from '../../models/attendance.model';
-import { ContentTree, ContentNode, ContentAttachment } from '../../models/content-tree.model';
+import { ContentTree, ContentNode } from '../../models/content-tree.model';
 import { environment } from 'src/environments/environment';
 
 interface MappedQuestion {
   qid: number;
   questiontext: string;
   questionmarks: number;
-  questiontype: string;       // 'mcq' | 'descriptive'
-  answer?: string;            // correct option label for MCQ e.g. 'B'
-  knowledgename?: string;
+  questiontype: string;
+  answer?: string;
   difficultyname?: string;
   bloomname?: string;
   options?: { optionid: number; optionlabel: string; optiontext: string }[];
+}
+
+interface ActiveTestSession {
+  sessionId: number;
+  expiresAt: string;
+  questionCount: number;
 }
 
 @Component({
@@ -27,7 +32,7 @@ interface MappedQuestion {
   styleUrls: ['./attendance.page.scss'],
   standalone: false
 })
-export class AttendancePage implements OnInit {
+export class AttendancePage implements OnInit, OnDestroy {
   loading = true;
   saving = false;
   activeTab: 'attendance' | 'details' = 'attendance';
@@ -55,9 +60,27 @@ export class AttendancePage implements OnInit {
   selectedChapter: ContentNode | null = null;
   selectedTopic: ContentNode | null = null;
 
-  // Mapped questions for selected topic
+  // Mapped questions
   mappedQuestions: MappedQuestion[] = [];
   questionsLoading = false;
+
+  // ── Quiz / Test ─────────────────────────────────────────────────────────────
+  showQuizPanel   = false;
+  quizDuration    = 15;
+  startingQuiz    = false;
+  stoppingQuiz    = false;
+  activeTest: ActiveTestSession | null = null;
+  questionType: 'mcq' | 'descriptive' = 'mcq';
+  selectedQids    = new Set<number>();
+
+  // PDF upload tracking per question (qid → state)
+  pdfUploadState  = new Map<number, 'idle' | 'uploading' | 'done' | 'error'>();
+  pdfUploadedPath = new Map<number, string>();
+  quizStudentSlnum = 0;   // student taking this descriptive exam on this device
+
+  // Countdown display for active test
+  timeLeftLabel   = '';
+  private countdownHandle: any = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -79,10 +102,15 @@ export class AttendancePage implements OnInit {
       this.courseName   = p['courseName']    || 'Attendance';
       this.loadStudents();
       this.loadContentTree();
+      this.checkActiveTest();
     });
   }
 
-  // ── Students ──────────────────────────────────────────────────────────────
+  ngOnDestroy() {
+    this.clearCountdown();
+  }
+
+  // ── Students ───────────────────────────────────────────────────────────────
 
   private loadStudents() {
     this.loading = true;
@@ -111,15 +139,10 @@ export class AttendancePage implements OnInit {
     });
   }
 
-  toggle(student: AttendanceEntry) {
-    student.isPresent = !student.isPresent;
-  }
+  toggle(student: AttendanceEntry) { student.isPresent = !student.isPresent; }
+  markAll(present: boolean) { this.students.forEach(s => s.isPresent = present); }
 
-  markAll(present: boolean) {
-    this.students.forEach(s => s.isPresent = present);
-  }
-
-  // ── A-Z filter ────────────────────────────────────────────────────────────
+  // ── A-Z filter ─────────────────────────────────────────────────────────────
 
   get filteredStudents(): AttendanceEntry[] {
     if (!this.filterLetter) return this.students;
@@ -135,18 +158,15 @@ export class AttendancePage implements OnInit {
     this.showFilterPopup = false;
   }
 
-  clearFilter() {
-    this.filterLetter = null;
-    this.showFilterPopup = false;
-  }
+  clearFilter() { this.filterLetter = null; this.showFilterPopup = false; }
 
-  // ── Stats ─────────────────────────────────────────────────────────────────
+  // ── Stats ──────────────────────────────────────────────────────────────────
 
   get totalCount():   number { return this.students.length; }
   get presentCount(): number { return this.students.filter(s => s.isPresent).length; }
   get absentCount():  number { return this.students.filter(s => !s.isPresent).length; }
 
-  // ── Content tree ──────────────────────────────────────────────────────────
+  // ── Content tree ───────────────────────────────────────────────────────────
 
   private loadContentTree() {
     if (!this.subjectSlnum || !this.sessionId) return;
@@ -160,13 +180,8 @@ export class AttendancePage implements OnInit {
     });
   }
 
-  get chapters(): ContentNode[] {
-    return this.selectedUnit?.children || [];
-  }
-
-  get topics(): ContentNode[] {
-    return this.selectedChapter?.children || [];
-  }
+  get chapters(): ContentNode[] { return this.selectedUnit?.children || []; }
+  get topics():   ContentNode[] { return this.selectedChapter?.children || []; }
 
   onUnitChange(unitId: number) {
     this.selectedUnit    = this.units.find(u => u.nodeId === +unitId) || null;
@@ -204,10 +219,7 @@ export class AttendancePage implements OnInit {
     return this.mappedQuestions.filter(q => q.questiontype?.toLowerCase() !== 'mcq');
   }
 
-  get topicLabel(): string {
-    if (!this.selectedTopic) return '';
-    return this.selectedTopic.nodeTitle;
-  }
+  get topicLabel(): string { return this.selectedTopic?.nodeTitle || ''; }
 
   hasDescription(node: ContentNode | null): boolean {
     if (!node?.nodeDescription) return false;
@@ -221,7 +233,166 @@ export class AttendancePage implements OnInit {
     return (bytes / 1048576).toFixed(1) + ' MB';
   }
 
-  // ── Save ──────────────────────────────────────────────────────────────────
+  // ── Quiz / Test ─────────────────────────────────────────────────────────────
+
+  /** Check if there is already an active quiz for this timetable slot */
+  private checkActiveTest() {
+    if (!this.slotId) return;
+    this.http.get<any>(`${environment.apiUrl}quiz/slot/${this.slotId}/active`)
+      .pipe(catchError(() => of(null)))
+      .subscribe(session => {
+        if (session?.sessionId) {
+          this.activeTest = session;
+          this.startCountdown();
+        }
+      });
+  }
+
+  get canStartQuiz(): boolean {
+    return !!this.selectedTopic && this.selectedQids.size > 0 && this.quizDuration >= 1;
+  }
+
+  adjustDuration(delta: number) {
+    this.quizDuration = Math.max(1, Math.min(180, this.quizDuration + delta));
+  }
+
+  openQuizPanel() {
+    if (!this.selectedTopic) {
+      this.showTopicPopup = true;
+      return;
+    }
+    this.questionType = 'mcq';
+    this.selectedQids = new Set(this.mcqQuestions.map(q => q.qid));
+    this.showQuizPanel = true;
+  }
+
+  getPdfState(qid: number): 'idle' | 'uploading' | 'done' | 'error' {
+    return this.pdfUploadState.get(qid) ?? 'idle';
+  }
+
+  async uploadQuizPdf(qid: number, event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+    const file = input.files[0];
+    if (!this.activeTest || !this.quizStudentSlnum) {
+      this.showToast('Enter student ID before uploading.', 'warning');
+      input.value = '';
+      return;
+    }
+    this.pdfUploadState.set(qid, 'uploading');
+    const form = new FormData();
+    form.append('file', file);
+    form.append('studentSlnum', String(this.quizStudentSlnum));
+    form.append('questionId', String(qid));
+    this.http.post<any>(`${environment.apiUrl}quiz/${this.activeTest.sessionId}/answer-pdf`, form)
+      .pipe(catchError(err => of({ __err: err })))
+      .subscribe(res => {
+        input.value = '';
+        if (res?.__err) {
+          this.pdfUploadState.set(qid, 'error');
+          this.showToast('Upload failed. Try again.', 'danger');
+          return;
+        }
+        this.pdfUploadState.set(qid, 'done');
+        this.pdfUploadedPath.set(qid, res.filePath);
+        this.showToast('PDF uploaded successfully.', 'success');
+      });
+  }
+
+  onQuizTypeChange(type: 'mcq' | 'descriptive'): void {
+    this.questionType = type;
+    const src = type === 'mcq' ? this.mcqQuestions : this.descriptiveQuestions;
+    this.selectedQids = new Set(src.map(q => q.qid));
+  }
+
+  toggleQid(qid: number): void {
+    if (this.selectedQids.has(qid)) this.selectedQids.delete(qid);
+    else this.selectedQids.add(qid);
+  }
+
+  isQidSelected(qid: number): boolean { return this.selectedQids.has(qid); }
+
+  selectAllQuizQs(): void {
+    const src = this.questionType === 'mcq' ? this.mcqQuestions : this.descriptiveQuestions;
+    this.selectedQids = new Set(src.map(q => q.qid));
+  }
+
+  clearQuizQs(): void { this.selectedQids = new Set(); }
+
+  async startTest() {
+    if (!this.canStartQuiz) return;
+    this.startingQuiz = true;
+    const questionIds = Array.from(this.selectedQids);
+    const payload = {
+      subjectSlnum:    this.subjectSlnum,
+      facultyId:       this.facultyId,
+      contentNodeId:   this.selectedTopic!.nodeId,
+      durationMinutes: this.quizDuration,
+      questionIds,
+      timetableSlotId: this.slotId,
+      questionType:    this.questionType
+    };
+    this.http.post<any>(`${environment.apiUrl}quiz/start`, payload)
+      .pipe(catchError(err => of({ __err: err })))
+      .subscribe(async res => {
+        this.startingQuiz = false;
+        if (res?.__err) {
+          this.showToast(res.__err?.error?.message || 'Failed to start test.', 'danger');
+          return;
+        }
+        this.activeTest = {
+          sessionId:     res.sessionId,
+          expiresAt:     res.expiresAt,
+          questionCount: questionIds.length
+        };
+        this.showQuizPanel = false;
+        this.startCountdown();
+        this.showToast(`Test started! ${this.quizDuration} min, ${questionIds.length} questions.`, 'success');
+      });
+  }
+
+  async stopTest() {
+    if (!this.activeTest) return;
+    this.stoppingQuiz = true;
+    this.http.post<any>(`${environment.apiUrl}quiz/${this.activeTest.sessionId}/stop`, {})
+      .pipe(catchError(err => of({ __err: err })))
+      .subscribe(async res => {
+        this.stoppingQuiz = false;
+        if (res?.__err) {
+          this.showToast(res.__err?.error?.message || 'Failed to stop test.', 'danger');
+          return;
+        }
+        this.clearCountdown();
+        this.activeTest = null;
+        this.showToast('Test stopped.', 'warning');
+      });
+  }
+
+  private startCountdown() {
+    this.clearCountdown();
+    this.updateTimeLabel();
+    this.countdownHandle = setInterval(() => this.updateTimeLabel(), 1000);
+  }
+
+  private clearCountdown() {
+    if (this.countdownHandle) { clearInterval(this.countdownHandle); this.countdownHandle = null; }
+  }
+
+  private updateTimeLabel() {
+    if (!this.activeTest?.expiresAt) { this.timeLeftLabel = ''; return; }
+    const sec = Math.max(0, Math.floor((new Date(this.activeTest.expiresAt).getTime() - Date.now()) / 1000));
+    if (sec === 0) { this.clearCountdown(); this.activeTest = null; this.timeLeftLabel = ''; return; }
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    this.timeLeftLabel = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  }
+
+  get timeLeftUrgent(): boolean {
+    if (!this.activeTest?.expiresAt) return false;
+    return Math.max(0, Math.floor((new Date(this.activeTest.expiresAt).getTime() - Date.now()) / 1000)) <= 60;
+  }
+
+  // ── Save ───────────────────────────────────────────────────────────────────
 
   initials(name: string): string {
     const parts = name.trim().split(' ');
@@ -230,34 +401,32 @@ export class AttendancePage implements OnInit {
     return (f + (parts.length > 1 ? l : '')).toUpperCase();
   }
 
-  backToTimetable() {
-    this.router.navigate(['/tabs/timetable']);
-  }
+  backToTimetable() { this.router.navigate(['/tabs/timetable']); }
 
   async saveAttendance() {
     if (!this.selectedTopic) return;
     this.saving = true;
     const payload = {
-      sessionId: this.sessionId,
-      slotId: this.slotId,
-      vsectionId: this.vsectionId,
+      sessionId:   this.sessionId,
+      slotId:      this.slotId,
+      vsectionId:  this.vsectionId,
       topicNodeId: this.selectedTopic.nodeId,
-      attendance: this.students.map(s => ({
+      attendance:  this.students.map(s => ({
         studentRegistrationSlnum: s.studentregistrationslnum,
         isPresent: s.isPresent
       }))
     };
-
-    // TODO: replace with actual save endpoint when available
     console.log('Save payload:', payload);
-
     const toast = await this.toastCtrl.create({
       message: `Attendance saved — ${this.presentCount} present, ${this.absentCount} absent`,
-      duration: 2500,
-      color: 'success',
-      position: 'bottom'
+      duration: 2500, color: 'success', position: 'bottom'
     });
     await toast.present();
     this.saving = false;
+  }
+
+  private async showToast(msg: string, color = 'dark') {
+    const t = await this.toastCtrl.create({ message: msg, duration: 3000, color, position: 'top' });
+    await t.present();
   }
 }

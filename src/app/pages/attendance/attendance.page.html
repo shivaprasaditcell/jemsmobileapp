@@ -16,6 +16,11 @@
         [class.filter-active]="filterLetter">
         <ion-icon slot="icon-only" name="filter-outline"></ion-icon>
       </ion-button>
+      <!-- Quiz / Test button -->
+      <ion-button (click)="openQuizPanel()" *ngIf="!loading" class="quiz-btn-header"
+        [class.quiz-active]="!!activeTest">
+        <ion-icon slot="icon-only" [name]="activeTest ? 'alarm' : 'rocket-outline'"></ion-icon>
+      </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
@@ -72,6 +77,21 @@
           <span class="stat-label">Absent</span>
           <span class="stat-val">{{ absentCount }}</span>
         </div>
+      </div>
+
+      <!-- Active Test Banner -->
+      <div class="active-test-banner" *ngIf="activeTest" [class.urgent]="timeLeftUrgent">
+        <div class="atb-left">
+          <ion-icon name="alarm"></ion-icon>
+          <div class="atb-info">
+            <span class="atb-label">LIVE TEST RUNNING</span>
+            <span class="atb-meta">{{ activeTest.questionCount }} questions &bull; {{ timeLeftLabel }} remaining</span>
+          </div>
+        </div>
+        <button class="atb-stop-btn" (click)="stopTest()" [disabled]="stoppingQuiz">
+          <ion-icon name="stop-circle-outline"></ion-icon>
+          {{ stoppingQuiz ? 'Stopping…' : 'Stop Test' }}
+        </button>
       </div>
 
       <!-- Topic selected banner -->
@@ -217,7 +237,7 @@
               <div class="mq-card" *ngFor="let q of mcqQuestions; let i = index">
                 <div class="mq-q-row">
                   <span class="mq-num">Q{{ i + 1 }}</span>
-                  <span class="mq-text">{{ q.questiontext }}</span>
+                  <span class="mq-text" [innerHTML]="q.questiontext"></span>
                   <span class="mq-marks" *ngIf="q.questionmarks">{{ q.questionmarks }}M</span>
                 </div>
                 <div class="mq-meta" *ngIf="q.difficultyname || q.bloomname">
@@ -244,7 +264,7 @@
               <div class="mq-card" *ngFor="let q of descriptiveQuestions; let i = index">
                 <div class="mq-q-row">
                   <span class="mq-num">Q{{ i + 1 }}</span>
-                  <span class="mq-text">{{ q.questiontext }}</span>
+                  <span class="mq-text" [innerHTML]="q.questiontext"></span>
                   <span class="mq-marks" *ngIf="q.questionmarks">{{ q.questionmarks }}M</span>
                 </div>
                 <div class="mq-meta" *ngIf="q.difficultyname || q.bloomname">
@@ -270,6 +290,177 @@
   </div>
 
 </ion-content>
+
+<!-- ── Quiz Config Panel ──────────────────────────────────────────────────── -->
+<div class="quiz-overlay" *ngIf="showQuizPanel" (click)="showQuizPanel = false">
+  <div class="quiz-panel" (click)="$event.stopPropagation()">
+
+    <div class="quiz-panel-header">
+      <span class="quiz-panel-icon"><ion-icon name="rocket-outline"></ion-icon></span>
+      <span class="quiz-panel-title">Start Test</span>
+      <button class="quiz-close-btn" (click)="showQuizPanel = false">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+    </div>
+
+    <!-- Topic info -->
+    <div class="quiz-topic-row" *ngIf="selectedTopic">
+      <ion-icon name="book-outline"></ion-icon>
+      <span>{{ selectedTopic.nodeTitle }}</span>
+    </div>
+
+    <!-- Question type toggle -->
+    <div class="quiz-type-toggle">
+      <button class="qtt-btn" [class.qtt-active]="questionType === 'mcq'" (click)="onQuizTypeChange('mcq')">
+        <ion-icon name="list-outline"></ion-icon> MCQ
+        <span class="qtt-count" *ngIf="mcqQuestions.length">{{ mcqQuestions.length }}</span>
+      </button>
+      <button class="qtt-btn" [class.qtt-active]="questionType === 'descriptive'" (click)="onQuizTypeChange('descriptive')">
+        <ion-icon name="document-text-outline"></ion-icon> Descriptive
+        <span class="qtt-count" *ngIf="descriptiveQuestions.length">{{ descriptiveQuestions.length }}</span>
+      </button>
+    </div>
+
+    <!-- Loading -->
+    <div class="quiz-loading" *ngIf="questionsLoading">
+      <ion-skeleton-text animated style="width:100%;height:52px;border-radius:8px;margin-bottom:6px"></ion-skeleton-text>
+      <ion-skeleton-text animated style="width:100%;height:52px;border-radius:8px;margin-bottom:6px"></ion-skeleton-text>
+      <ion-skeleton-text animated style="width:100%;height:52px;border-radius:8px"></ion-skeleton-text>
+    </div>
+
+    <ng-container *ngIf="!questionsLoading">
+
+      <!-- MCQ Questions -->
+      <ng-container *ngIf="questionType === 'mcq'">
+        <div class="quiz-no-mcq" *ngIf="!mcqQuestions.length">
+          <ion-icon name="warning-outline"></ion-icon>
+          <span>No MCQ questions mapped to this topic. Add questions first.</span>
+        </div>
+
+        <div class="quiz-q-list" *ngIf="mcqQuestions.length">
+          <div class="quiz-q-sel-bar">
+            <span class="quiz-q-sel-info">
+              <ion-icon name="checkbox-outline"></ion-icon>
+              {{ selectedQids.size }} / {{ mcqQuestions.length }} selected
+            </span>
+            <button class="qsel-btn" (click)="selectAllQuizQs()">All</button>
+            <button class="qsel-btn" (click)="clearQuizQs()">None</button>
+          </div>
+          <div class="quiz-q-item" *ngFor="let q of mcqQuestions; let i = index"
+               [class.qitem-selected]="isQidSelected(q.qid)"
+               (click)="toggleQid(q.qid)">
+            <div class="qitem-top">
+              <ion-icon [name]="isQidSelected(q.qid) ? 'checkbox' : 'square-outline'" class="qitem-chk"
+                        [class.qitem-chk-on]="isQidSelected(q.qid)"></ion-icon>
+              <span class="qitem-num">Q{{ i + 1 }}</span>
+              <span class="qitem-marks" *ngIf="q.questionmarks">{{ q.questionmarks }}M</span>
+            </div>
+            <p class="qitem-text" [innerHTML]="q.questiontext"></p>
+            <div class="qitem-options" *ngIf="q.options?.length">
+              <div class="qitem-option"
+                *ngFor="let o of q.options"
+                [class.qopt-correct]="o.optionlabel === q.answer">
+                <ion-icon
+                  [name]="o.optionlabel === q.answer ? 'checkmark-circle' : 'ellipse-outline'"
+                  [class.correct-icon]="o.optionlabel === q.answer">
+                </ion-icon>
+                <span class="qopt-label">{{ o.optionlabel }}.</span>
+                <span class="qopt-text">{{ o.optiontext }}</span>
+              </div>
+            </div>
+            <div class="qitem-tags" *ngIf="q.difficultyname || q.bloomname">
+              <span class="qtag" *ngIf="q.difficultyname">{{ q.difficultyname }}</span>
+              <span class="qtag" *ngIf="q.bloomname">{{ q.bloomname }}</span>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Descriptive Questions (reference only, no online test) -->
+      <ng-container *ngIf="questionType === 'descriptive'">
+        <div class="quiz-no-mcq" *ngIf="!descriptiveQuestions.length">
+          <ion-icon name="warning-outline"></ion-icon>
+          <span>No descriptive questions for this topic.</span>
+        </div>
+
+        <div class="quiz-q-list" *ngIf="descriptiveQuestions.length">
+          <div class="quiz-q-sel-bar">
+            <span class="quiz-q-sel-info">
+              <ion-icon name="checkbox-outline"></ion-icon>
+              {{ selectedQids.size }} / {{ descriptiveQuestions.length }} selected
+            </span>
+            <button class="qsel-btn" (click)="selectAllQuizQs()">All</button>
+            <button class="qsel-btn" (click)="clearQuizQs()">None</button>
+          </div>
+          <!-- Student ID input (required for PDF upload) -->
+          <div class="quiz-student-id-row" *ngIf="activeTest">
+            <ion-icon name="person-outline"></ion-icon>
+            <input class="quiz-student-input" type="number"
+                   [(ngModel)]="quizStudentSlnum"
+                   placeholder="Enter Student Slnum for upload" />
+          </div>
+
+          <div class="quiz-q-item" *ngFor="let q of descriptiveQuestions; let i = index"
+               [class.qitem-selected]="isQidSelected(q.qid)"
+               (click)="toggleQid(q.qid)">
+            <div class="qitem-top">
+              <ion-icon [name]="isQidSelected(q.qid) ? 'checkbox' : 'square-outline'" class="qitem-chk"
+                        [class.qitem-chk-on]="isQidSelected(q.qid)"></ion-icon>
+              <span class="qitem-num">Q{{ i + 1 }}</span>
+              <span class="qitem-marks" *ngIf="q.questionmarks">{{ q.questionmarks }}M</span>
+            </div>
+            <p class="qitem-text" [innerHTML]="q.questiontext"></p>
+            <div class="qitem-tags" *ngIf="q.difficultyname || q.bloomname">
+              <span class="qtag" *ngIf="q.difficultyname">{{ q.difficultyname }}</span>
+              <span class="qtag" *ngIf="q.bloomname">{{ q.bloomname }}</span>
+            </div>
+
+            <!-- PDF upload (only when test is live) -->
+            <div class="qitem-pdf-row" *ngIf="activeTest" (click)="$event.stopPropagation()">
+              <!-- Idle -->
+              <label class="qpdf-btn"
+                     *ngIf="getPdfState(q.qid) === 'idle' || getPdfState(q.qid) === 'error'"
+                     [class.qpdf-btn-error]="getPdfState(q.qid) === 'error'">
+                <ion-icon name="cloud-upload-outline"></ion-icon>
+                {{ getPdfState(q.qid) === 'error' ? 'Retry' : 'Upload Answer PDF' }}
+                <input type="file" accept="application/pdf" hidden
+                       (change)="uploadQuizPdf(q.qid, $event)" />
+              </label>
+              <!-- Uploading -->
+              <div class="qpdf-uploading" *ngIf="getPdfState(q.qid) === 'uploading'">
+                <ion-spinner name="crescent" style="width:16px;height:16px"></ion-spinner>
+                <span>Uploading…</span>
+              </div>
+              <!-- Done -->
+              <div class="qpdf-done" *ngIf="getPdfState(q.qid) === 'done'">
+                <ion-icon name="checkmark-circle"></ion-icon>
+                <span>PDF uploaded</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+    </ng-container>
+
+    <!-- Duration -->
+    <div class="quiz-duration-row">
+      <span class="quiz-dur-label">Duration (minutes)</span>
+      <div class="quiz-dur-stepper">
+        <button class="dur-btn" (click)="adjustDuration(-5)">−</button>
+        <span class="dur-val">{{ quizDuration }}</span>
+        <button class="dur-btn" (click)="adjustDuration(+5)">+</button>
+      </div>
+    </div>
+
+    <!-- Start button -->
+    <button class="quiz-start-btn" [disabled]="!canStartQuiz || startingQuiz" (click)="startTest()">
+      <ion-icon name="play-circle-outline"></ion-icon>
+      {{ startingQuiz ? 'Starting…' : 'Start Test (' + selectedQids.size + ' Qs · ' + quizDuration + ' min)' }}
+    </button>
+
+  </div>
+</div>
 
 <!-- ── Topic Selector Popup ───────────────────────────────────────────────── -->
 <div class="topic-overlay" *ngIf="showTopicPopup" (click)="showTopicPopup = false">

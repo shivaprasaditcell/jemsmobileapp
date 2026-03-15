@@ -5,12 +5,12 @@ import { DeptStaff } from '../../models/dept-staff.model';
 import { AuthService } from '../../core/services/auth.service';
 
 @Component({
-  selector: 'app-dept-master',
-  templateUrl: './dept-master.page.html',
-  styleUrls: ['./dept-master.page.scss'],
+  selector: 'app-contacts',
+  templateUrl: './contacts.page.html',
+  styleUrls: ['./contacts.page.scss'],
   standalone: false
 })
-export class DeptMasterPage implements OnInit {
+export class ContactsPage implements OnInit {
   allStaff: DeptStaff[] = [];
   loading = true;
 
