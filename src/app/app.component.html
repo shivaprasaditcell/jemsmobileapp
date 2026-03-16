@@ -85,6 +85,12 @@
           <ion-label>Contacts</ion-label>
         </ion-item>
 
+        <ion-item button (click)="navigate('/tabs/student-marks')" class="menu-item"
+          routerLink="/tabs/student-marks" routerLinkActive="active-item">
+          <ion-icon name="ribbon-outline" slot="start"></ion-icon>
+          <ion-label>Marks Card</ion-label>
+        </ion-item>
+
         <ion-item button (click)="navigate('/tabs/events')" class="menu-item"
           routerLink="/tabs/events" routerLinkActive="active-item">
           <ion-icon name="megaphone-outline" slot="start"></ion-icon>

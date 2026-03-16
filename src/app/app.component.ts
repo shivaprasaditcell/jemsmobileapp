@@ -39,6 +39,7 @@ export class AppComponent implements OnInit {
     { title: 'Documents', subtitle: 'Records', route: '/tabs/student-documents', icon: 'document-text-outline', accent: '#6a70ca', tint: 'rgba(106, 112, 202, 0.14)' },
     { title: 'Mentor', subtitle: 'Academic', route: '/tabs/mentoring-sessions', icon: 'people-circle-outline', accent: '#8d52c1', tint: 'rgba(141, 82, 193, 0.14)' },
     { title: 'Contacts', subtitle: 'Directory', route: '/tabs/contacts', icon: 'business-outline', accent: '#1d9eaf', tint: 'rgba(29, 158, 175, 0.14)' },
+    { title: 'Marks Card', subtitle: 'Academic', route: '/tabs/student-marks', icon: 'ribbon-outline', accent: '#e05c5c', tint: 'rgba(224, 92, 92, 0.14)' },
     { title: 'Events', subtitle: 'General', route: '/tabs/events', icon: 'megaphone-outline', accent: '#1e9db5', tint: 'rgba(30, 157, 181, 0.14)' },
     { title: 'Change Password', subtitle: 'General', route: '/tabs/change-password', icon: 'lock-closed-outline', accent: '#d05454', tint: 'rgba(208, 84, 84, 0.14)' }
   ];

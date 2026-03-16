@@ -1,0 +1,135 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start"><ion-back-button defaultHref="/tabs/home"></ion-back-button></ion-buttons>
+    <ion-title>Marks Card</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="marks-content ion-padding">
+
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Session selector -->
+  <div class="session-row" *ngIf="!sessionsLoading && sessions.length">
+    <ion-item lines="none" class="session-select-item">
+      <ion-icon name="school-outline" slot="start" color="primary"></ion-icon>
+      <ion-select
+        [(ngModel)]="selectedSessionId"
+        (ionChange)="onSessionChange()"
+        interface="action-sheet"
+        placeholder="Select Session"
+        class="session-select">
+        <ion-select-option *ngFor="let s of sessions" [value]="s.sessionslnum || s.Sessionslnum">
+          {{ sessionLabel(s) }}
+        </ion-select-option>
+      </ion-select>
+    </ion-item>
+  </div>
+
+  <ion-skeleton-text *ngIf="sessionsLoading" animated style="width:100%;height:52px;border-radius:12px;margin-bottom:16px"></ion-skeleton-text>
+
+  <!-- Error -->
+  <div class="marks-error" *ngIf="!loading && !sessionsLoading && error">
+    <ion-icon name="cloud-offline-outline"></ion-icon>
+    <h3>Unable to load marks</h3>
+    <p>{{ error }}</p>
+    <ion-button fill="outline" size="small" (click)="loadMarks()">Retry</ion-button>
+  </div>
+
+  <!-- Loading skeleton -->
+  <div *ngIf="loading">
+    <div class="skeleton-card" *ngFor="let i of [1,2]">
+      <div class="skeleton-header">
+        <ion-skeleton-text animated style="width:40px;height:40px;border-radius:10px"></ion-skeleton-text>
+        <div style="flex:1">
+          <ion-skeleton-text animated style="width:65%;height:15px;border-radius:6px;margin-bottom:6px"></ion-skeleton-text>
+          <ion-skeleton-text animated style="width:35%;height:11px;border-radius:6px"></ion-skeleton-text>
+        </div>
+      </div>
+      <ion-skeleton-text animated *ngFor="let j of [1,2,3]" style="width:100%;height:44px;border-radius:8px;margin-top:8px"></ion-skeleton-text>
+    </div>
+  </div>
+
+  <!-- No data -->
+  <div class="marks-empty" *ngIf="!loading && !error && subjects.length === 0 && !sessionsLoading && selectedSessionId">
+    <ion-icon name="document-text-outline"></ion-icon>
+    <h3>No marks available</h3>
+    <p>No IA marks have been recorded for this session yet.</p>
+  </div>
+
+  <!-- Subject cards -->
+  <div *ngIf="!loading && !error && subjects.length > 0">
+    <div class="subject-card" *ngFor="let subject of subjects; let i = index">
+
+      <!-- Card header -->
+      <div class="subject-header" [style.borderLeftColor]="subjectAccentColor(i)">
+        <div class="subject-avatar" [style.background]="subjectAccentColor(i)">
+          {{ subjectInitials(subject.subjectName) }}
+        </div>
+        <div class="subject-info">
+          <h3 class="subject-name">{{ subject.subjectName }}</h3>
+          <p class="subject-code" *ngIf="subject.subjectCode">{{ subject.subjectCode }}</p>
+        </div>
+        <div class="subject-total" *ngIf="subject.quizzes.length > 0">
+          <span class="total-obtained" [style.color]="marksColor(overallPct(subject))">
+            {{ totalObtained(subject) }}
+          </span>
+          <span class="total-sep">/ {{ totalMax(subject) }}</span>
+        </div>
+      </div>
+
+      <!-- Overall bar -->
+      <div class="overall-bar" *ngIf="subject.quizzes.length > 0 && overallPct(subject) !== null">
+        <div class="overall-bar-track">
+          <div class="overall-bar-fill"
+            [style.width.%]="overallPct(subject)!"
+            [style.background]="marksColor(overallPct(subject))">
+          </div>
+        </div>
+        <span class="overall-pct" [style.color]="marksColor(overallPct(subject))">
+          {{ overallPct(subject) }}%
+        </span>
+      </div>
+
+      <!-- Test rows -->
+      <div class="test-list" *ngIf="subject.quizzes.length > 0">
+        <div class="test-row-wrap" *ngFor="let quiz of subject.quizzes; let qi = index">
+
+          <!-- Main row (always visible) -->
+          <div class="test-row" (click)="toggleRow(i, qi)">
+
+            <div class="test-badge" [style.background]="subjectAccentColor(i) + '22'" [style.color]="subjectAccentColor(i)">
+              T{{ quiz.index }}
+            </div>
+
+            <div class="test-info">
+              <p class="test-topic" [class.test-topic--expanded]="isExpanded(i, qi)">{{ quiz.quizTitle }}</p>
+              <span class="test-meta">
+                <ion-icon name="calendar-outline"></ion-icon> {{ formatDate(quiz.startedAt) }}
+                &nbsp;·&nbsp;
+                <ion-icon [name]="quiz.questionType === 'mcq' ? 'list-outline' : 'create-outline'"></ion-icon>
+                {{ quiz.questionType === 'mcq' ? 'MCQ' : 'Descriptive' }}
+              </span>
+            </div>
+
+            <div class="test-score">
+              <span class="score-val" [style.color]="marksColor(quiz.percentage)">
+                {{ quiz.marksObtained !== null ? quiz.marksObtained : '—' }}
+              </span>
+              <span class="score-max">/ {{ quiz.totalMarks }}</span>
+            </div>
+
+            <ion-icon class="expand-icon" [name]="isExpanded(i, qi) ? 'chevron-up-outline' : 'chevron-down-outline'"></ion-icon>
+          </div>
+
+        </div>
+      </div>
+
+      <p class="no-tests" *ngIf="subject.quizzes.length === 0">No tests recorded yet.</p>
+
+    </div>
+  </div>
+
+</ion-content>

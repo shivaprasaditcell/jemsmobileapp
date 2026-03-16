@@ -100,6 +100,10 @@ const routes: Routes = [
         loadChildren: () => import('../pages/student-quiz/student-quiz.module').then(m => m.StudentQuizPageModule)
       },
       {
+        path: 'student-marks',
+        loadChildren: () => import('../pages/student-marks/student-marks.module').then(m => m.StudentMarksPageModule)
+      },
+      {
         path: '',
         redirectTo: 'home',
         pathMatch: 'full'

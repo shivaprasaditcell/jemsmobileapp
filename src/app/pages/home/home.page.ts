@@ -59,6 +59,7 @@ export class HomePage implements OnInit, OnDestroy {
     { label: 'Documents',        icon: 'document-text-outline', route: '/tabs/student-documents', accent: '#6a70ca' },
     { label: 'Mentor',           icon: 'people-circle-outline', route: '/tabs/mentoring-sessions', accent: '#8d52c1' },
     { label: 'Contacts',         icon: 'business-outline', route: '/tabs/contacts', accent: '#1d9eaf' },
+    { label: 'Marks Card',       icon: 'ribbon-outline', route: '/tabs/student-marks', accent: '#e05c5c' },
     { label: 'Events',           icon: 'megaphone-outline', route: '/tabs/events', accent: '#1e9db5' }
   ];
 
